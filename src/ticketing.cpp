@@ -6,11 +6,9 @@
  */
 
 #include "../include/ticketing.h"
+#include "../include/globals.h"
 #include <iostream>
 #include <cstdlib>
-
-// External global data (declared in main.cpp)
-extern std::vector<Station> allStations;
 
 // ======================================================================================
 //                                   TICKET SYSTEM IMPLEMENTATION

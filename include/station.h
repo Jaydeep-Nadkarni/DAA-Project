@@ -48,6 +48,11 @@ struct Station {
 //                                   HELPER FUNCTIONS
 // ======================================================================================
 
+// Forward declarations
+class StationBST;
+class RailwayNetwork;
+
 std::string getLineName(LineType l);
+void initializeStations(StationBST& stationDirectory, RailwayNetwork* mumbaiLocal);
 
 #endif // STATION_H

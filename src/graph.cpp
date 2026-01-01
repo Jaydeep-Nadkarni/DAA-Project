@@ -6,14 +6,10 @@
  */
 
 #include "../include/graph.h"
+#include "../include/globals.h"
 #include "../include/queue_manager.h"
 #include <iostream>
 #include <queue>
-#include <unordered_map>
-
-// External global data (declared in main.cpp)
-extern std::vector<std::vector<Edge>> adj;
-extern std::unordered_map<int, std::string> stationIdToName;
 
 // ======================================================================================
 //                                   RAILWAY NETWORK IMPLEMENTATION
