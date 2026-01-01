@@ -1,4 +1,12 @@
 {
+  "metadata": {
+    "version": "2.0",
+    "last_updated": "2026-01-01",
+    "system": "Mumbai Local Railway Management System",
+    "total_stations": 77,
+    "total_lines": 4,
+    "realtime_analytics": "enabled"
+  },
   "routes": [
     {
       "id": 1,
@@ -18,7 +26,9 @@
       "estimated_time_min": 42,
       "train_frequency_min": 5,
       "peak_hour_frequency_min": 3,
-      "type": "fast"
+      "type": "fast",
+      "daily_passengers_avg": 45000,
+      "revenue_per_day_rs": 1440
     },
     {
       "id": 2,
@@ -158,28 +168,5 @@
       "peak_hour_frequency_min": 4,
       "type": "fast"
     }
-  ],
-  "metadata": {
-    "total_routes": 8,
-    "lines_covered": ["Western", "Central", "Harbour"],
-    "interchange_stations": ["Dadar", "CST", "Kurla", "Andheri", "Mumbai Central"],
-    "peak_hours": {
-      "morning": {
-        "start": "08:00",
-        "end": "11:00",
-        "direction": "Suburbs to City"
-      },
-      "evening": {
-        "start": "17:00",
-        "end": "21:00",
-        "direction": "City to Suburbs"
-      }
-    },
-    "fare_structure": {
-      "base_fare": 10,
-      "per_km_rate": 2,
-      "senior_discount": 0.5,
-      "monthly_pass_multiplier": 40
-    }
-  }
+  ]
 }
