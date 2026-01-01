@@ -501,47 +501,10 @@ Pre-configured popular routes:
 ## Authors
 
 - **Project Lead**: Jaydeep Nadkarni
+- **Team**: kartik Pujari, Amruta K. , Praveen B.
+- **Mentor**: Prof. Vaishali Parab
 - **Course**: Design and Analysis of Algorithms (DAA)
 - **Institution**: KLE Technological University
-- **Year**: 2026
+- **Year**: 2025-26
 
 ---
-
-## Acknowledgments
-
-- **Mumbai Railway**: For inspiration and real-world data
-- **DSA Community**: For algorithm implementations and best practices
-- **Open Source Contributors**: For various libraries and tools
-- **Course Instructors**: For guidance and feedback
-
----
-
-## 📞 Contact & Support
-
-- **GitHub Issues**: [Report bugs or request features](https://github.com/Jaydeep-Nadkarni/DAA-Project/issues)
-- **Email**: [Your Email]
-- **Documentation**: [Wiki Pages](https://github.com/Jaydeep-Nadkarni/DAA-Project/wiki)
-
----
-
-## 📚 Additional Resources
-
-### Learning Resources
-- [Introduction to Algorithms (CLRS)](https://mitpress.mit.edu/books/introduction-algorithms)
-- [Data Structures and Algorithm Analysis in C++](https://www.pearson.com/store/p/data-structures-and-algorithm-analysis-in-c/P100000127089)
-- [GeeksforGeeks DSA Tutorial](https://www.geeksforgeeks.org/data-structures/)
-
-### Related Projects
-- [Railway Reservation System](https://github.com/topics/railway-reservation)
-- [Transportation Management Systems](https://github.com/topics/transportation)
-- [Graph Algorithms Visualization](https://visualgo.net/en/graphds)
-
----
-
-<div align="center">
-
-**⭐ If you find this project helpful, please consider giving it a star! ⭐**
-
-Made with ❤️ for the DAA community
-
-</div>

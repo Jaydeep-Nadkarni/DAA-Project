@@ -36,6 +36,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <iomanip>
+#include <algorithm>
 
 // Include all module headers
 #include "../include/globals.h"
@@ -59,12 +60,6 @@ RailwayNetwork* mumbaiLocal;        // Graph-based railway network
 PlatformQueue platformManager(10);  // Circular queue for platform allocation
 
 // ======================================================================================
-//                                   PASSENGER TYPE HELPER
-// ======================================================================================
-
-enum PassengerType { GENERAL, LADIES, SENIOR, DISABILITY };
-
-// ======================================================================================
 //                                   SYSTEM INITIALIZATION
 // ======================================================================================
 
@@ -85,75 +80,34 @@ enum PassengerType { GENERAL, LADIES, SENIOR, DISABILITY };
  * Real-world use: System startup, cold boot initialization
  */
 void initializeSystem() {
-    cout << "\n╔════════════════════════════════════════════════════════╗\n";
-    cout << "║         SYSTEM INITIALIZATION IN PROGRESS...          ║\n";
-    cout << "╚════════════════════════════════════════════════════════╝\n\n";
+    cout << "\n========================================================\n";
+    cout << "         SYSTEM INITIALIZATION IN PROGRESS...          \n";
+    cout << "========================================================\n\n";
     
-    // Step 1: Initialize stations and global data structures
-    cout << "[1/5] Initializing stations across all lines...\n";
-    initializeStations();  // From station.cpp - populates allStations
+    // Step 1: Create railway network graph
+    cout << "[1/5] Creating railway network graph...\n";
+    mumbaiLocal = new RailwayNetwork(100);
     
-    // Step 2: Build station directory (BST)
-    cout << "[2/5] Building station directory (BST)...\n";
-    for (const auto& station : allStations) {
-        stationDirectory.addStation(station.name, station.id);
-    }
+    // Step 2: Initialize stations with BST and graph
+    cout << "[2/5] Initializing stations across all lines...\n";
+    initializeStations(stationDirectory, mumbaiLocal);
     
-    // Step 3: Create railway network graph
-    cout << "[3/5] Creating railway network graph...\n";
-    mumbaiLocal = new RailwayNetwork(allStations.size());
-    
-    // Step 4: Add tracks between stations
-    cout << "[4/5] Connecting stations with tracks...\n";
-    
-    // Connect Western Line stations
-    vector<string> westernStations = {
-        "Churchgate", "Marine Lines", "Charni Road", "Grant Road", 
-        "Mumbai Central", "Dadar", "Bandra", "Andheri", "Borivali", "Virar"
-    };
-    for (size_t i = 0; i < westernStations.size() - 1; ++i) {
-        int u = stationNameToId[westernStations[i]];
-        int v = stationNameToId[westernStations[i + 1]];
-        mumbaiLocal->addTrack(u, v, 3 + (rand() % 3));
-    }
-    
-    // Connect Central Line stations
-    vector<string> centralStations = {
-        "CST", "Masjid", "Sandhurst Road", "Byculla", "Dadar", 
-        "Kurla", "Ghatkopar", "Thane", "Kalyan", "Dombivli"
-    };
-    for (size_t i = 0; i < centralStations.size() - 1; ++i) {
-        int u = stationNameToId[centralStations[i]];
-        int v = stationNameToId[centralStations[i + 1]];
-        mumbaiLocal->addTrack(u, v, 4 + (rand() % 3));
-    }
-    
-    // Connect Harbour Line stations
-    vector<string> harbourStations = {
-        "CST", "Dockyard Road", "Govandi", "Mankhurd", 
-        "Vashi", "Nerul", "Belapur", "Panvel"
-    };
-    for (size_t i = 0; i < harbourStations.size() - 1; ++i) {
-        int u = stationNameToId[harbourStations[i]];
-        int v = stationNameToId[harbourStations[i + 1]];
-        mumbaiLocal->addTrack(u, v, 5 + (rand() % 3));
-    }
-    
-    // Step 5: Schedule initial trains
-    cout << "[5/5] Scheduling initial trains...\n";
+    // Step 3: Schedule initial trains
+    cout << "[3/5] Scheduling initial trains...\n";
     
     // Morning trains
-    trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["Churchgate"]);   // 6:00 AM
-    trainScheduler.scheduleTrain(102, "Virar Slow", 375, stationNameToId["Virar"]);            // 6:15 AM
-    trainScheduler.scheduleTrain(103, "CST Express", 420, stationNameToId["CST"]);             // 7:00 AM
-    trainScheduler.scheduleTrain(104, "Kalyan Local", 450, stationNameToId["Kalyan"]);         // 7:30 AM
+    trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["churchgate"]);   // 6:00 AM
+    trainScheduler.scheduleTrain(102, "Virar Slow", 375, stationNameToId["virar"]);            // 6:15 AM
+    trainScheduler.scheduleTrain(103, "CST Express", 420, stationNameToId["cst"]);             // 7:00 AM
+    trainScheduler.scheduleTrain(104, "Kalyan Local", 450, stationNameToId["kalyan"]);         // 7:30 AM
     
     // Peak hour trains
-    trainScheduler.scheduleTrain(201, "Dadar Special", 480, stationNameToId["Dadar"]);         // 8:00 AM
-    trainScheduler.scheduleTrain(202, "Andheri Fast", 510, stationNameToId["Andheri"]);        // 8:30 AM
-    trainScheduler.scheduleTrain(203, "Harbour Express", 540, stationNameToId["Panvel"]);      // 9:00 AM
+    trainScheduler.scheduleTrain(201, "Dadar Special", 480, stationNameToId["dadar"]);         // 8:00 AM
+    trainScheduler.scheduleTrain(202, "Andheri Fast", 510, stationNameToId["andheri"]);        // 8:30 AM
+    trainScheduler.scheduleTrain(203, "Harbour Express", 540, stationNameToId["panvel"]);      // 9:00 AM
     
-    // Assign some trains to platform queue
+    // Step 4: Assign some trains to platform queue
+    cout << "[4/5] Allocating platforms...\n";
     platformManager.enqueue(101);
     platformManager.enqueue(102);
     platformManager.enqueue(103);
@@ -183,49 +137,70 @@ void initializeSystem() {
  * 8. Exit
  */
 void displayMenu() {
-    cout << "\n╔════════════════════════════════════════════════════════╗\n";
-    cout << "║     MUMBAI LOCAL TRANSPORTATION MANAGEMENT SYSTEM      ║\n";
-    cout << "╚════════════════════════════════════════════════════════╝\n";
-    cout << "┌────────────────────────────────────────────────────────┐\n";
-    cout << "│  STATION & ROUTE MANAGEMENT                            │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  1. View All Stations (BST Traversal)                 │\n";
-    cout << "│  2. Search Station (BST Search)                       │\n";
-    cout << "│  3. Find Fastest Route (Dijkstra)                     │\n";
-    cout << "│  4. Check Network Connectivity (BFS)                  │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  TICKETING & PASSENGER MANAGEMENT                      │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  5. Buy Ticket (Multi-Queue Processing)               │\n";
-    cout << "│  6. View Ticketing Statistics                         │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  TRAIN SCHEDULING & PLATFORMS                          │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  7. View Train Schedule (Min Heap)                    │\n";
-    cout << "│  8. Optimize Peak Hour Frequency                      │\n";
-    cout << "│  9. Process Platform Queue                            │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  ANALYTICS & REPORTS                                   │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  10. Passenger Flow Analytics                         │\n";
-    cout << "│  11. Station Congestion Report                        │\n";
-    cout << "│  12. Peak Hour Statistics                             │\n";
-    cout << "│  13. Comprehensive Dashboard                          │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  ADMINISTRATION & EMERGENCY                            │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  14. Report Track Failure (Block Track)              │\n";
-    cout << "│  15. Display Network Statistics                       │\n";
-    cout << "│  16. Simulate Passenger Load                          │\n";
-    cout << "├────────────────────────────────────────────────────────┤\n";
-    cout << "│  0. Exit System                                       │\n";
-    cout << "└────────────────────────────────────────────────────────┘\n";
+    cout << "\n========================================================\n";
+    cout << "     MUMBAI LOCAL TRANSPORTATION MANAGEMENT SYSTEM      \n";
+    cout << "========================================================\n";
+    cout << "\n[STATION & ROUTE MANAGEMENT]\n";
+    cout << "  1. View All Stations (BST Traversal)\n";
+    cout << "  2. Search Station (BST Search)\n";
+    cout << "  3. Find Fastest Route (Dijkstra)\n";
+    cout << "  4. Check Network Connectivity (BFS)\n";
+    cout << "\n[TICKETING & PASSENGER MANAGEMENT]\n";
+    cout << "  5. Buy Ticket (Multi-Queue Processing)\n";
+    cout << "  6. View Ticketing Statistics\n";
+    cout << "\n[TRAIN SCHEDULING & PLATFORMS]\n";
+    cout << "  7. View Train Schedule (Min Heap)\n";
+    cout << "  8. Optimize Peak Hour Frequency\n";
+    cout << "  9. Process Platform Queue\n";
+    cout << "\n[ANALYTICS & REPORTS]\n";
+    cout << "  10. Passenger Flow Analytics\n";
+    cout << "  11. Station Congestion Report\n";
+    cout << "  12. Peak Hour Statistics\n";
+    cout << "  13. Comprehensive Dashboard\n";
+    cout << "\n[ADMINISTRATION & EMERGENCY]\n";
+    cout << "  14. Report Track Failure (Block Track)\n";
+    cout << "  15. Display Network Statistics\n";
+    cout << "  16. Simulate Passenger Load\n";
+    cout << "\n[EXIT]\n";
+    cout << "  0. Exit System\n";
+    cout << "========================================================\n";
     cout << "\nEnter your choice: ";
 }
 
 // ======================================================================================
 //                                   MENU HANDLERS
 // ======================================================================================
+
+/**
+ * Function: showStationSuggestions
+ * Displays matching station suggestions and allows user to select one
+ * Returns station ID on successful selection, -1 if user cancels
+ */
+int showStationSuggestions(const std::string& prefix) {
+    std::vector<std::pair<std::string, int>> suggestions = stationDirectory.listMatchingStations(prefix);
+    
+    if (suggestions.empty()) {
+        cout << "\n❌ No stations found matching: " << prefix << "\n";
+        return -1;
+    }
+    
+    cout << "\nDid you mean one of these?\n";
+    for (size_t i = 0; i < suggestions.size(); ++i) {
+        cout << "  " << (i + 1) << ". " << suggestions[i].first << "\n";
+    }
+    cout << "  0. Cancel\n";
+    cout << "Enter choice (0-" << suggestions.size() << "): ";
+    
+    int choice;
+    cin >> choice;
+    
+    if (choice < 1 || choice > (int)suggestions.size()) {
+        cout << "Search cancelled.\n";
+        return -1;
+    }
+    
+    return suggestions[choice - 1].second;
+}
 
 /**
  * Function: handleStationSearch
@@ -240,23 +215,31 @@ void handleStationSearch() {
     cin.ignore();
     getline(cin, stationName);
     
-    int stationId = stationDirectory.getStationId(stationName);
+    // Convert to lowercase for lookup
+    string stationNameLower = stationName;
+    std::transform(stationNameLower.begin(), stationNameLower.end(), stationNameLower.begin(), ::tolower);
+    
+    int stationId = -1;
+    if (stationNameToId.find(stationNameLower) != stationNameToId.end()) {
+        stationId = stationNameToId[stationNameLower];
+    }
     
     if (stationId == -1) {
         cout << "\n❌ Station not found: " << stationName << "\n";
-        cout << "Please check the spelling and try again.\n";
-    } else {
-        const Station& station = allStations[stationId];
-        cout << "\n✓ Station Found!\n";
-        cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-        cout << "Name: " << station.name << "\n";
-        cout << "ID: " << station.id << "\n";
-        cout << "Line: " << station.getLineName() << "\n";
-        cout << "Platforms: " << station.platforms << "\n";
-        cout << "Current Load: " << station.passengerCount << " passengers\n";
-        cout << "Interchange: " << (station.isInterchange ? "Yes" : "No") << "\n";
-        cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        stationId = showStationSuggestions(stationName);
+        if (stationId == -1) return;
     }
+    
+    const Station& station = allStations[stationId];
+    cout << "\n✓ Station Found!\n";
+    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    cout << "Name: " << station.name << "\n";
+    cout << "ID: " << station.id << "\n";
+    cout << "Line: " << getLineName(station.line) << "\n";
+    cout << "Platforms: " << station.platforms << "\n";
+    cout << "Current Load: " << station.passengerCount << " passengers\n";
+    cout << "Interchange: " << (station.isInterchange ? "Yes" : "No") << "\n";
+    cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
 }
 
 /**
@@ -274,12 +257,30 @@ void handleRouteSearch() {
     cout << "Enter destination station: ";
     getline(cin, destName);
     
-    int srcId = stationDirectory.getStationId(srcName);
-    int destId = stationDirectory.getStationId(destName);
+    // Convert to lowercase for lookup
+    string srcNameLower = srcName;
+    string destNameLower = destName;
+    std::transform(srcNameLower.begin(), srcNameLower.end(), srcNameLower.begin(), ::tolower);
+    std::transform(destNameLower.begin(), destNameLower.end(), destNameLower.begin(), ::tolower);
     
-    if (srcId == -1 || destId == -1) {
-        cout << "\n❌ Invalid station name(s). Please check spelling.\n";
-        return;
+    int srcId = -1, destId = -1;
+    if (stationNameToId.find(srcNameLower) != stationNameToId.end()) {
+        srcId = stationNameToId[srcNameLower];
+    }
+    if (stationNameToId.find(destNameLower) != stationNameToId.end()) {
+        destId = stationNameToId[destNameLower];
+    }
+    
+    if (srcId == -1) {
+        cout << "\n❌ Source station not found: " << srcName << "\n";
+        srcId = showStationSuggestions(srcName);
+        if (srcId == -1) return;
+    }
+    
+    if (destId == -1) {
+        cout << "\n❌ Destination station not found: " << destName << "\n";
+        destId = showStationSuggestions(destName);
+        if (destId == -1) return;
     }
     
     mumbaiLocal->findFastestRoute(srcId, destId);
@@ -298,11 +299,19 @@ void handleConnectivityCheck() {
     cin.ignore();
     getline(cin, stationName);
     
-    int stationId = stationDirectory.getStationId(stationName);
+    // Convert to lowercase for lookup
+    string stationNameLower = stationName;
+    std::transform(stationNameLower.begin(), stationNameLower.end(), stationNameLower.begin(), ::tolower);
+    
+    int stationId = -1;
+    if (stationNameToId.find(stationNameLower) != stationNameToId.end()) {
+        stationId = stationNameToId[stationNameLower];
+    }
     
     if (stationId == -1) {
-        cout << "\n❌ Station not found.\n";
-        return;
+        cout << "\n❌ Station not found: " << stationName << "\n";
+        stationId = showStationSuggestions(stationName);
+        if (stationId == -1) return;
     }
     
     mumbaiLocal->showConnectivity(stationId);
@@ -342,10 +351,19 @@ void handleTicketing() {
     cin.ignore();
     getline(cin, destName);
     
-    int destId = stationDirectory.getStationId(destName);
+    // Convert to lowercase for lookup
+    string destNameLower = destName;
+    std::transform(destNameLower.begin(), destNameLower.end(), destNameLower.begin(), ::tolower);
+    
+    int destId = -1;
+    if (stationNameToId.find(destNameLower) != stationNameToId.end()) {
+        destId = stationNameToId[destNameLower];
+    }
+    
     if (destId == -1) {
-        cout << "\n❌ Invalid destination station.\n";
-        return;
+        cout << "\n❌ Invalid destination station: " << destName << "\n";
+        destId = showStationSuggestions(destName);
+        if (destId == -1) return;
     }
     
     // Create passenger object (simplified - no full Passenger struct needed)

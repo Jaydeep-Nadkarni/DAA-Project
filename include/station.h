@@ -25,7 +25,7 @@ enum TrainStatus { ON_TIME, DELAYED, CANCELLED };
 enum PassengerType { GENERAL, LADIES, SENIOR, DISABILITY };
 
 const int INF = 1e9;
-const int MAX_STATIONS = 200;
+const int MAX_STATIONS = 100;
 
 // ======================================================================================
 //                                   STATION STRUCTURE

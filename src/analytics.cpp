@@ -71,6 +71,35 @@ void StationBST::listStations() {
     std::cout << "---------------------------------------------------------\n";
 }
 
+void StationBST::collectMatching(Node* node, const std::string& prefix, std::vector<std::pair<std::string, int>>& results) {
+    if (node == NULL) return;
+    
+    // Collect from left subtree
+    collectMatching(node->left, prefix, results);
+    
+    // Check if current node matches prefix (case-insensitive)
+    std::string nodeName = node->name;
+    std::string nodeLower(nodeName);
+    std::transform(nodeLower.begin(), nodeLower.end(), nodeLower.begin(), ::tolower);
+    
+    std::string prefixLower = prefix;
+    std::transform(prefixLower.begin(), prefixLower.end(), prefixLower.begin(), ::tolower);
+    
+    if (nodeLower.substr(0, prefixLower.length()) == prefixLower && results.size() < 10) {
+        results.push_back({nodeName, node->id});
+    }
+    
+    // Collect from right subtree
+    collectMatching(node->right, prefix, results);
+}
+
+std::vector<std::pair<std::string, int>> StationBST::listMatchingStations(std::string prefix) {
+    std::vector<std::pair<std::string, int>> results;
+    if (prefix.empty()) return results;
+    collectMatching(root, prefix, results);
+    return results;
+}
+
 // ======================================================================================
 //                                   PASSENGER FLOW ANALYTICS
 // ======================================================================================

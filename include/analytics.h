@@ -9,6 +9,8 @@
 #define ANALYTICS_H
 
 #include <string>
+#include <vector>
+#include <utility>
 
 // Forward declaration
 class TicketSystem;
@@ -34,6 +36,7 @@ class StationBST {
     Node* insert(Node* node, std::string name, int id);
     Node* search(Node* node, std::string name);
     void inorder(Node* node);
+    void collectMatching(Node* node, const std::string& prefix, std::vector<std::pair<std::string, int>>& results);
 
 public:
     StationBST();
@@ -41,6 +44,7 @@ public:
     void addStation(std::string name, int id);
     int getStationId(std::string name);
     void listStations();
+    std::vector<std::pair<std::string, int>> listMatchingStations(std::string prefix);
 };
 
 // ======================================================================================
