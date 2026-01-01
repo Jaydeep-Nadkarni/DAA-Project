@@ -60,6 +60,12 @@ public:
     // Getters for analytics
     int getTotalTickets() const { return totalTicketsSold; }
     long long getTotalRevenue() const { return totalRevenue; }
+    
+    // Direct revenue tracking for ticketing
+    void recordTicket(int fare) {
+        totalTicketsSold++;
+        totalRevenue += fare;
+    }
 };
 
 #endif // TICKETING_H

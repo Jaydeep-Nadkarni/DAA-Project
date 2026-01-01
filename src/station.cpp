@@ -98,13 +98,11 @@ void initializeStations(StationBST& stationDirectory, RailwayNetwork* mumbaiLoca
         std::string nameLower = name;
         std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
         
-        for (auto& pair : stationNameToId) {
-            std::string existingLower = pair.first;
-            std::transform(existingLower.begin(), existingLower.end(), existingLower.begin(), ::tolower);
-            if (existingLower == nameLower) {
-                allStations[pair.second].isInterchange = true;
-                return pair.second;
-            }
+        // Check if station already exists
+        if (stationNameToId.find(nameLower) != stationNameToId.end()) {
+            int existingId = stationNameToId[nameLower];
+            allStations[existingId].isInterchange = true;
+            return existingId;
         }
         
         Station s(idCounter, name, line);
@@ -144,38 +142,58 @@ void initializeStations(StationBST& stationDirectory, RailwayNetwork* mumbaiLoca
     
     // WESTERN LINE: Connect sequential stations (2-4 km, 3-5 min)
     for (size_t i = 0; i < western.size() - 1; ++i) {
-        int u = stationNameToId[western[i]];
-        int v = stationNameToId[western[i + 1]];
+        std::string uNameLower = western[i];
+        std::transform(uNameLower.begin(), uNameLower.end(), uNameLower.begin(), ::tolower);
+        std::string vNameLower = western[i + 1];
+        std::transform(vNameLower.begin(), vNameLower.end(), vNameLower.begin(), ::tolower);
+        
+        int u_id = stationNameToId[uNameLower];
+        int v_id = stationNameToId[vNameLower];
         int distance = 2 + (rand() % 3);  // 2-4 km
         int time = 3 + (rand() % 3);      // 3-5 min
-        mumbaiLocal->addTrack(u, v, time, WESTERN);
+        mumbaiLocal->addTrack(u_id, v_id, time, distance, WESTERN);
     }
     
     // CENTRAL LINE: Connect sequential stations (2-4 km, 3-5 min)
     for (size_t i = 0; i < central.size() - 1; ++i) {
-        int u = stationNameToId[central[i]];
-        int v = stationNameToId[central[i + 1]];
+        std::string uNameLower = central[i];
+        std::transform(uNameLower.begin(), uNameLower.end(), uNameLower.begin(), ::tolower);
+        std::string vNameLower = central[i + 1];
+        std::transform(vNameLower.begin(), vNameLower.end(), vNameLower.begin(), ::tolower);
+        
+        int u_id = stationNameToId[uNameLower];
+        int v_id = stationNameToId[vNameLower];
         int distance = 2 + (rand() % 3);  // 2-4 km
         int time = 3 + (rand() % 3);      // 3-5 min
-        mumbaiLocal->addTrack(u, v, time, CENTRAL);
+        mumbaiLocal->addTrack(u_id, v_id, time, distance, CENTRAL);
     }
     
     // HARBOUR LINE: Connect sequential stations (3-5 km, 4-6 min)
     for (size_t i = 0; i < harbour.size() - 1; ++i) {
-        int u = stationNameToId[harbour[i]];
-        int v = stationNameToId[harbour[i + 1]];
+        std::string uNameLower = harbour[i];
+        std::transform(uNameLower.begin(), uNameLower.end(), uNameLower.begin(), ::tolower);
+        std::string vNameLower = harbour[i + 1];
+        std::transform(vNameLower.begin(), vNameLower.end(), vNameLower.begin(), ::tolower);
+        
+        int u_id = stationNameToId[uNameLower];
+        int v_id = stationNameToId[vNameLower];
         int distance = 3 + (rand() % 3);  // 3-5 km
         int time = 4 + (rand() % 3);      // 4-6 min
-        mumbaiLocal->addTrack(u, v, time, HARBOUR);
+        mumbaiLocal->addTrack(u_id, v_id, time, distance, HARBOUR);
     }
     
     // TRANS-HARBOUR LINE: Connect sequential stations (4-6 km, 5-7 min)
     for (size_t i = 0; i < transHarbour.size() - 1; ++i) {
-        int u = stationNameToId[transHarbour[i]];
-        int v = stationNameToId[transHarbour[i + 1]];
+        std::string uNameLower = transHarbour[i];
+        std::transform(uNameLower.begin(), uNameLower.end(), uNameLower.begin(), ::tolower);
+        std::string vNameLower = transHarbour[i + 1];
+        std::transform(vNameLower.begin(), vNameLower.end(), vNameLower.begin(), ::tolower);
+        
+        int u_id = stationNameToId[uNameLower];
+        int v_id = stationNameToId[vNameLower];
         int distance = 4 + (rand() % 3);  // 4-6 km
         int time = 5 + (rand() % 3);      // 5-7 min
-        mumbaiLocal->addTrack(u, v, time, TRANS_HARBOUR);
+        mumbaiLocal->addTrack(u_id, v_id, time, distance, TRANS_HARBOUR);
     }
     
     std::cout << "Stations initialized: " << allStations.size() << " total stations loaded.\n";

@@ -120,6 +120,7 @@ public:
     // Core Scheduling Operations
     void scheduleTrain(int id, std::string name, int time, int startStationId);
     void showUpcomingTrains();          // Display schedule in chronological order
+    void showTrainsAtStation(int stationId);  // Show trains arriving at a specific station
     void optimizeFrequency(bool isPeakHour);  // Dynamic frequency management
     
     // Getters for monitoring

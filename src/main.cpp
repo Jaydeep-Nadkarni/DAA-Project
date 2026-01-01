@@ -157,6 +157,7 @@ void displayMenu() {
     cout << "  11. Station Congestion Report\n";
     cout << "  12. Peak Hour Statistics\n";
     cout << "  13. Comprehensive Dashboard\n";
+    cout << "  17. Realtime Dashboard (Enhanced Analytics)\n";
     cout << "\n[ADMINISTRATION & EMERGENCY]\n";
     cout << "  14. Report Track Failure (Block Track)\n";
     cout << "  15. Display Network Statistics\n";
@@ -320,9 +321,10 @@ void handleConnectivityCheck() {
 /**
  * Function: handleTicketing
  * Processes ticket purchase with multi-queue priority system
+ * Now computes fare based on real distance between source and destination
  */
 void handleTicketing() {
-    string name, destName;
+    string name, srcName, destName;
     int age;
     
     cout << "\n┌────────────────────────────────────────────────────────┐\n";
@@ -347,8 +349,28 @@ void handleTicketing() {
     if (typeChoice == 2) type = LADIES;
     if (typeChoice == 3 || age > 60) type = SENIOR;
     
-    cout << "Enter destination station: ";
+    // Get source station
+    cout << "Enter source station: ";
     cin.ignore();
+    getline(cin, srcName);
+    
+    // Convert to lowercase for lookup
+    string srcNameLower = srcName;
+    std::transform(srcNameLower.begin(), srcNameLower.end(), srcNameLower.begin(), ::tolower);
+    
+    int srcId = -1;
+    if (stationNameToId.find(srcNameLower) != stationNameToId.end()) {
+        srcId = stationNameToId[srcNameLower];
+    }
+    
+    if (srcId == -1) {
+        cout << "\n❌ Invalid source station: " << srcName << "\n";
+        srcId = showStationSuggestions(srcName);
+        if (srcId == -1) return;
+    }
+    
+    // Get destination station
+    cout << "Enter destination station: ";
     getline(cin, destName);
     
     // Convert to lowercase for lookup
@@ -366,6 +388,14 @@ void handleTicketing() {
         if (destId == -1) return;
     }
     
+    // Compute real distance via Dijkstra
+    int distance = mumbaiLocal->getDistance(srcId, destId);
+    
+    if (distance == INF) {
+        cout << "\n❌ No route found between " << srcName << " and " << destName << "\n";
+        return;
+    }
+    
     // Create passenger object (simplified - no full Passenger struct needed)
     cout << "\n✓ Passenger " << name << " added to ";
     if (type == LADIES) cout << "LADIES";
@@ -373,9 +403,8 @@ void handleTicketing() {
     else cout << "GENERAL";
     cout << " queue.\n";
     
-    // Simulate ticket generation
+    // Compute fare: 10 + 2*distance_km
     int baseFare = 10;
-    int distance = (rand() % 50) + 5;  // Random distance 5-55 km
     int fare = baseFare + (distance * 2);
     
     // Apply discount for seniors
@@ -388,12 +417,14 @@ void handleTicketing() {
     cout << "                   TICKET DETAILS\n";
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     cout << "Passenger: " << name << " (Age: " << age << ")\n";
+    cout << "Source: " << srcName << "\n";
     cout << "Destination: " << destName << "\n";
     cout << "Distance: " << distance << " km\n";
     cout << "Fare: Rs. " << fare << "\n";
     cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     
-    // Update ticketing stats (simplified)
+    // Update ticketing stats - record in TicketSystem for analytics
+    ticketMachine.recordTicket(fare);
     allStations[destId].passengerCount++;
 }
 
@@ -534,17 +565,73 @@ int main() {
                 break;
                 
             case 7:
-                // View train schedule
-                trainScheduler.showUpcomingTrains();
+                // View train schedule at a station
+                {
+                    cout << "\n┌────────────────────────────────────────────────────────┐\n";
+                    cout << "│            VIEW TRAINS AT STATION                       │\n";
+                    cout << "└────────────────────────────────────────────────────────┘\n";
+                    cout << "Enter station name: ";
+                    cin.ignore();
+                    string stationName;
+                    getline(cin, stationName);
+                    
+                    // Convert to lowercase for lookup
+                    string stationNameLower = stationName;
+                    std::transform(stationNameLower.begin(), stationNameLower.end(), 
+                                   stationNameLower.begin(), ::tolower);
+                    
+                    int stationId = -1;
+                    if (stationNameToId.find(stationNameLower) != stationNameToId.end()) {
+                        stationId = stationNameToId[stationNameLower];
+                    }
+                    
+                    if (stationId == -1) {
+                        cout << "\n❌ Invalid station: " << stationName << "\n";
+                        stationId = showStationSuggestions(stationName);
+                        if (stationId == -1) break;
+                    }
+                    
+                    trainScheduler.showTrainsAtStation(stationId);
+                }
                 break;
                 
             case 8:
-                // Optimize for peak hours
+                // Optimize for peak hours: Find max congestion station and add specials
                 {
                     cout << "\n┌────────────────────────────────────────────────────────┐\n";
                     cout << "│           PEAK HOUR FREQUENCY OPTIMIZATION             │\n";
                     cout << "└────────────────────────────────────────────────────────┘\n";
+                    
+                    // Find station with maximum passenger count
+                    int maxPassengerStation = 0;
+                    int maxPassengers = 0;
+                    
+                    for (int i = 0; i < (int)allStations.size(); i++) {
+                        if (allStations[i].passengerCount > maxPassengers) {
+                            maxPassengers = allStations[i].passengerCount;
+                            maxPassengerStation = i;
+                        }
+                    }
+                    
+                    cout << "\nPeak Station Analysis:\n";
+                    cout << "Peak Station: " << allStations[maxPassengerStation].name 
+                         << " (Passengers: " << maxPassengers << ")\n\n";
+                    
+                    // Add special trains to peak station
                     trainScheduler.optimizeFrequency(true);
+                    
+                    // Allocate platforms realtime for special trains
+                    cout << "\nRealtime Platform Allocation:\n";
+                    if (platformManager.getSize() < platformManager.getCapacity()) {
+                        platformManager.enqueue(901);  // Peak Special 1
+                        platformManager.enqueue(902);  // Peak Special 2
+                        platformManager.enqueue(903);  // Peak Special 3
+                        cout << "✓ Allocated platforms for peak specials\n";
+                        cout << "  Platform Queue: " << platformManager.getSize() 
+                             << "/" << platformManager.getCapacity() << " (Trains waiting)\n";
+                    } else {
+                        cout << "⚠ Platform queue full, cannot allocate more trains\n";
+                    }
                 }
                 break;
                 
@@ -588,6 +675,11 @@ int main() {
                 simulatePassengerLoad();
                 break;
                 
+            case 17:
+                // Realtime dashboard with enhanced analytics
+                displayComprehensiveAnalytics(ticketMachine);
+                break;
+                
             case 0:
                 // Exit system
                 cout << "\n╔════════════════════════════════════════════════════════╗\n";
@@ -598,7 +690,7 @@ int main() {
                 break;
                 
             default:
-                cout << "\n❌ Invalid choice. Please select a valid option (0-16).\n";
+                cout << "\n❌ Invalid choice. Please select a valid option (0-17).\n";
                 break;
         }
         

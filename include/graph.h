@@ -43,7 +43,7 @@ public:
     RailwayNetwork(int v);
     
     // Track Management
-    void addTrack(int u, int v, int w, LineType line);
+    void addTrack(int u, int v, int w, int distance, LineType line);
     void blockTrack(int u, int v);
     
     // Path Finding Algorithms
@@ -52,6 +52,9 @@ public:
     // Network Analysis
     void showConnectivity(int startNode);      // Uses BFS + Custom MyQueue
     void displayNetworkStats();                // Display graph statistics
+    
+    // Distance Query
+    int getDistance(int src, int dest);        // Get distance between two stations
 };
 
 #endif // GRAPH_H

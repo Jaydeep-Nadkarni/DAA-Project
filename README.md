@@ -1,8 +1,6 @@
 # Mumbai Local Transportation Management System
 
 [![C++](https://img.shields.io/badge/C++-11/14-blue.svg)](https://isocpp.org/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](https://github.com)
 
 A comprehensive urban transportation management system simulating the Mumbai Local Railway network. This project demonstrates the practical application of various **Data Structures and Algorithms (DSA)** to solve real-world problems including routing, crowd management, train scheduling, and emergency handling.
 

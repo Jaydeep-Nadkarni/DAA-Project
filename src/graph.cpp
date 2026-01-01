@@ -37,12 +37,13 @@ RailwayNetwork::RailwayNetwork(int v) {
  * Parameters:
  *   u, v - Station IDs to connect
  *   w - Weight (travel time in minutes)
+ *   distance - Distance in kilometers
  *   line - LineType (WESTERN, CENTRAL, HARBOUR, etc.)
  * Time Complexity: O(1)
  */
-void RailwayNetwork::addTrack(int u, int v, int w, LineType line) {
-    Edge e1 = {v, w, 2, line};  // Distance defaulted to 2 km
-    Edge e2 = {u, w, 2, line};
+void RailwayNetwork::addTrack(int u, int v, int w, int distance, LineType line) {
+    Edge e1 = {v, w, distance, line};
+    Edge e2 = {u, w, distance, line};
     adj[u].push_back(e1);
     adj[v].push_back(e2);
 }
@@ -52,6 +53,7 @@ void RailwayNetwork::addTrack(int u, int v, int w, LineType line) {
  * Implements Dijkstra's Algorithm to find the shortest path between two stations
  * Uses STL priority_queue for efficient min-heap operations
  * Uses CUSTOM MyStack for path reconstruction (demonstrating custom data structure)
+ * Tracks both time and distance, computes ticket cost based on distance
  * 
  * Parameters:
  *   src - Source station ID
@@ -60,9 +62,10 @@ void RailwayNetwork::addTrack(int u, int v, int w, LineType line) {
  * Algorithm Steps:
  *   1. Initialize distances to infinity, source distance to 0
  *   2. Use priority queue to process nodes in order of shortest distance
- *   3. Relax edges and update distances
+ *   3. Relax edges and update distances (using real edge distances)
  *   4. Reconstruct path using Custom MyStack (LIFO for reverse traversal)
- *   5. Display route and total time
+ *   5. Calculate total distance_km and cost (formula: 10 + 2*distance_km)
+ *   6. Display route with distance, time, and cost
  * 
  * Time Complexity: O((V + E) log V) where V = vertices, E = edges
  * Space Complexity: O(V)
@@ -72,9 +75,11 @@ void RailwayNetwork::findFastestRoute(int src, int dest) {
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, 
                         std::greater<std::pair<int, int>>> pq;
     std::vector<int> dist(V, INF);
+    std::vector<int> distKm(V, 0);  // Track distance in km
     std::vector<int> parent(V, -1);
 
     dist[src] = 0;
+    distKm[src] = 0;
     pq.push({0, src});
 
     // Dijkstra's main loop
@@ -87,10 +92,12 @@ void RailwayNetwork::findFastestRoute(int src, int dest) {
         // Relax all edges from current node
         for (auto& edge : adj[u]) {
             int v = edge.to;
-            int weight = edge.weight;
+            int weight = edge.weight;  // Time in minutes
+            int edgeDistance = edge.distance;  // Real distance in km
 
             if (dist[u] + weight < dist[v]) {
                 dist[v] = dist[u] + weight;
+                distKm[v] = distKm[u] + edgeDistance;  // Accumulate distance
                 parent[v] = u;
                 pq.push({dist[v], v});
             }
@@ -113,24 +120,39 @@ void RailwayNetwork::findFastestRoute(int src, int dest) {
         curr = parent[curr];
     }
 
+    // Calculate cost: 10 + 2 * distance_km
+    int totalDistanceKm = distKm[dest];
+    int ticketCost = 10 + (2 * totalDistanceKm);
+
     // Display results
-    std::cout << "\n--- Fastest Route Found ---\n";
-    std::cout << "Total Time: " << dist[dest] << " minutes\n";
-    std::cout << "Route: ";
+    std::cout << "\n========== Route Details ==========";
+    std::cout << "\nRoute: ";
     
-    while (!path.empty()) {
-        int s = path.top();
-        path.pop();
-        std::cout << stationIdToName[s];
-        if (!path.empty()) std::cout << " -> ";
+    MyStack<int> pathCopy;  // Copy for displaying route
+    curr = dest;
+    while (curr != -1) {
+        pathCopy.push(curr);
+        curr = parent[curr];
     }
-    std::cout << "\n---------------------------\n";
+    
+    while (!pathCopy.empty()) {
+        int s = pathCopy.top();
+        pathCopy.pop();
+        std::cout << stationIdToName[s];
+        if (!pathCopy.empty()) std::cout << " -> ";
+    }
+    
+    std::cout << "\n\nDistance (km): " << totalDistanceKm;
+    std::cout << "\nTime (min):    " << dist[dest];
+    std::cout << "\nCost (Rs):     " << ticketCost;
+    std::cout << "\n==================================\n";
 }
 
 /**
  * Function: showConnectivity
  * Implements BFS (Breadth-First Search) to check network connectivity
  * Uses CUSTOM MyQueue for level-order traversal (demonstrating custom data structure)
+ * Lists all reachable stations with numbered display
  * 
  * Parameters:
  *   startNode - Starting station ID for connectivity check
@@ -139,22 +161,25 @@ void RailwayNetwork::findFastestRoute(int src, int dest) {
  *   1. Initialize visited array
  *   2. Use Custom MyQueue for BFS traversal
  *   3. Process nodes level by level
- *   4. Count and display total reachable stations
+ *   4. Collect and number all reachable stations
+ *   5. Display formatted list with station names and IDs
  * 
  * Time Complexity: O(V + E) where V = vertices, E = edges
  * Space Complexity: O(V)
  * 
- * Purpose: Used to verify network integrity and detect disconnected components
+ * Purpose: Used to verify network integrity and display all reachable destinations
  */
 void RailwayNetwork::showConnectivity(int startNode) {
     std::vector<bool> visited(V, false);
+    std::vector<int> reachableStations;  // Store all reachable stations
     MyQueue<int> q;  // Using CUSTOM Queue for BFS
 
     visited[startNode] = true;
     q.push(startNode);
 
-    std::cout << "\n--- Network Connectivity Check (BFS) ---\n";
-    std::cout << "Starting from " << stationIdToName[startNode] << ":\n";
+    std::cout << "\n========== Network Connectivity (BFS) ==========";
+    std::cout << "\nStarting from: " << stationIdToName[startNode];
+    std::cout << "\n\nReachable Stations:\n";
 
     int count = 0;
     
@@ -162,6 +187,7 @@ void RailwayNetwork::showConnectivity(int startNode) {
     while (!q.empty()) {
         int u = q.front();
         q.pop();
+        reachableStations.push_back(u);
         count++;
 
         // Explore all adjacent stations
@@ -173,8 +199,15 @@ void RailwayNetwork::showConnectivity(int startNode) {
         }
     }
     
-    std::cout << "Total Reachable Stations: " << count << std::endl;
-    std::cout << "----------------------------------------\n";
+    // Display numbered list of reachable stations
+    for (int i = 0; i < (int)reachableStations.size(); ++i) {
+        int stationId = reachableStations[i];
+        std::cout << "  " << (i + 1) << ". " << stationIdToName[stationId] 
+                  << " (ID: " << stationId << ")\n";
+    }
+    
+    std::cout << "\nTotal Reachable: " << count << " stations";
+    std::cout << "\n===============================================\n";
 }
 
 /**
@@ -251,4 +284,58 @@ void RailwayNetwork::displayNetworkStats() {
               << stationIdToName[maxConnectedStation] 
               << " (" << maxConnections << " connections)" << std::endl;
     std::cout << "================================================\n";
+}
+
+/**
+ * Function: getDistance
+ * Computes the shortest distance (in km) between two stations using Dijkstra's algorithm
+ * 
+ * Parameters:
+ *   src - Source station ID
+ *   dest - Destination station ID
+ * 
+ * Returns:
+ *   Total distance in kilometers, or INF if no path exists
+ * 
+ * Algorithm:
+ *   Same as findFastestRoute but returns distance instead of displaying route
+ * 
+ * Time Complexity: O((V + E) log V)
+ * Use Case: Computing fare based on actual route distance
+ */
+int RailwayNetwork::getDistance(int src, int dest) {
+    // Handle invalid station IDs
+    if (src < 0 || src >= V || dest < 0 || dest >= V) {
+        return INF;
+    }
+    
+    // Use Dijkstra's algorithm to find minimum distance
+    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, 
+                        std::greater<std::pair<int, int>>> pq;
+    std::vector<int> distKm(V, INF);
+    
+    distKm[src] = 0;
+    pq.push({0, src});
+    
+    while (!pq.empty()) {
+        int d = pq.top().first;
+        int u = pq.top().second;
+        pq.pop();
+        
+        if (d > distKm[u]) continue;  // Skip if already processed
+        if (u == dest) break;          // Early termination if destination reached
+        
+        // Relax edges from u
+        for (auto& edge : adj[u]) {
+            int v = edge.to;
+            int edgeDistance = edge.distance;
+            
+            if (distKm[u] + edgeDistance < distKm[v]) {
+                distKm[v] = distKm[u] + edgeDistance;
+                pq.push({distKm[v], v});
+            }
+        }
+    }
+    
+    return distKm[dest];
 }

@@ -144,6 +144,80 @@ void Scheduler::showUpcomingTrains() {
 }
 
 /**
+ * Function: showTrainsAtStation
+ * Displays all trains arriving at a specific station
+ * Filters trains by nextStationId and shows platform allocation
+ * 
+ * Parameters:
+ *   stationId - The station ID to filter trains for
+ * 
+ * Algorithm:
+ *   1. Extract all trains from MinHeap into temporary copy
+ *   2. Filter trains where nextStationId == stationId
+ *   3. Display filtered trains in time order
+ *   4. Show platform information from platformManager front
+ * 
+ * Time Complexity: O(n log n) where n = total trains
+ * 
+ * Real-world use: Station platform displays showing next arrivals
+ */
+void Scheduler::showTrainsAtStation(int stationId) {
+    // Create a temporary copy to avoid destroying original schedule
+    MinHeap<Train> temp = trainSchedule;
+    
+    std::cout << "\n========== Trains Arriving at Station ==========\n";
+    std::cout << std::left 
+              << std::setw(10) << "Time" 
+              << std::setw(22) << "Train Name" 
+              << std::setw(12) << "Status"
+              << std::setw(10) << "Train ID" << std::endl;
+    std::cout << "-------------------------------------------------------\n";
+    
+    int count = 0;
+    std::vector<Train> filteredTrains;
+    
+    // Extract all trains and filter by station
+    while (!temp.empty()) {
+        Train t = temp.top();
+        temp.pop();
+        
+        if (t.nextStationId == stationId) {
+            filteredTrains.push_back(t);
+        }
+    }
+    
+    // Sort by time if needed and display
+    for (const auto& t : filteredTrains) {
+        // Convert minutes from midnight to HH:MM format
+        int hrs = t.arrivalTime / 60;
+        int mins = t.arrivalTime % 60;
+        char timeStr[10];
+        sprintf(timeStr, "%02d:%02d", hrs, mins);
+        
+        // Convert status enum to string
+        std::string statusStr;
+        switch(t.status) {
+            case ON_TIME: statusStr = "ON TIME"; break;
+            case DELAYED: statusStr = "DELAYED"; break;
+            case CANCELLED: statusStr = "CANCELLED"; break;
+            default: statusStr = "UNKNOWN";
+        }
+        
+        // Display train information
+        std::cout << std::left 
+                  << std::setw(10) << timeStr 
+                  << std::setw(22) << t.name 
+                  << std::setw(12) << statusStr
+                  << std::setw(10) << t.trainId << std::endl;
+        count++;
+    }
+    
+    std::cout << "-------------------------------------------------------\n";
+    std::cout << "Total Trains at Station: " << count << std::endl;
+    std::cout << "===============================================\n";
+}
+
+/**
  * Function: optimizeFrequency
  * Dynamically adjusts train frequency based on peak/off-peak hours
  * 
@@ -175,8 +249,8 @@ void Scheduler::showUpcomingTrains() {
  *   - Dynamic scheduling reduces overcrowding
  * 
  * Example Peak Hours:
- *   Morning: 08:00 - 11:00 (Office commute)
- *   Evening: 17:00 - 21:00 (Return commute)
+ *   Morning: 0800 - 1100 (Office commute)
+ *   Evening: 1700 - 2100 (Return commute)
  */
 void Scheduler::optimizeFrequency(bool isPeakHour) {
     if (isPeakHour) {

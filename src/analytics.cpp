@@ -406,7 +406,7 @@ void displayPeakHourStatistics() {
  */
 void displayComprehensiveAnalytics(const TicketSystem& ticketSystem) {
     std::cout << "\n╔════════════════════════════════════════════════════════╗\n";
-    std::cout << "║       COMPREHENSIVE ANALYTICS DASHBOARD               ║\n";
+    std::cout << "║       REALTIME COMPREHENSIVE ANALYTICS DASHBOARD      ║\n";
     std::cout << "╚════════════════════════════════════════════════════════╝\n\n";
     
     // System Overview
@@ -422,11 +422,11 @@ void displayComprehensiveAnalytics(const TicketSystem& ticketSystem) {
     
     std::cout << "Network Size: " << allStations.size() << " stations\n";
     std::cout << "Interchange Stations: " << interchangeCount << "\n";
-    std::cout << "Total Passengers: " << totalPassengers << "\n";
-    std::cout << "Active Lines: 3 (Western, Central, Harbour)\n\n";
+    std::cout << "Total Passengers Tracked: " << totalPassengers << "\n";
+    std::cout << "Active Lines: 4 (Western, Central, Harbour, Trans-Harbour)\n\n";
     
-    // Financial Summary
-    std::cout << "💰 FINANCIAL SUMMARY:\n";
+    // Financial Summary (REALTIME)
+    std::cout << "💰 FINANCIAL SUMMARY (REALTIME):\n";
     std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     std::cout << "Tickets Sold: " << ticketSystem.getTotalTickets() << "\n";
     std::cout << "Total Revenue: Rs. " << ticketSystem.getTotalRevenue() << "\n";
@@ -435,11 +435,16 @@ void displayComprehensiveAnalytics(const TicketSystem& ticketSystem) {
         double avgRevenue = (double)ticketSystem.getTotalRevenue() / ticketSystem.getTotalTickets();
         std::cout << "Average Ticket Price: Rs. " << std::fixed << std::setprecision(2) 
                   << avgRevenue << "\n";
+        
+        // Estimate daily revenue (assuming linear projection)
+        double projectedDailyRevenue = ticketSystem.getTotalRevenue() * 10;  // Scale factor
+        std::cout << "Projected Daily Revenue: Rs. " << std::fixed << std::setprecision(0) 
+                  << projectedDailyRevenue << "\n";
     }
     std::cout << "\n";
     
-    // Operational Metrics
-    std::cout << "⚙️  OPERATIONAL METRICS:\n";
+    // Congestion Analysis (REALTIME)
+    std::cout << "🚄 CONGESTION ANALYSIS (REALTIME):\n";
     std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     
     double avgPassengersPerStation = allStations.size() > 0 
@@ -459,13 +464,57 @@ void displayComprehensiveAnalytics(const TicketSystem& ticketSystem) {
     }
     std::cout << "Busiest Station: " << busiestStation << " (" << maxPassengers << " passengers)\n";
     
+    // Categorize congestion levels
+    int highCongestionCount = 0;
+    int mediumCongestionCount = 0;
+    int lowCongestionCount = 0;
+    int lowThreshold = (int)avgPassengersPerStation / 2;
+    int highThreshold = (int)avgPassengersPerStation * 1.5;
+    
+    for (const auto& station : allStations) {
+        if (station.passengerCount >= highThreshold) {
+            highCongestionCount++;
+        } else if (station.passengerCount >= lowThreshold) {
+            mediumCongestionCount++;
+        } else {
+            lowCongestionCount++;
+        }
+    }
+    
+    std::cout << "Congestion Status:\n";
+    std::cout << "  🔴 HIGH Congestion: " << highCongestionCount << " stations\n";
+    std::cout << "  🟡 MEDIUM Congestion: " << mediumCongestionCount << " stations\n";
+    std::cout << "  🟢 LOW Congestion: " << lowCongestionCount << " stations\n";
+    std::cout << "\n";
+    
+    // Peak Hour Statistics (REALTIME)
+    std::cout << "⏰ PEAK HOUR STATISTICS (REALTIME):\n";
+    std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+    
+    // Simulate peak hour detection based on total passengers
+    std::string peakStatus = (totalPassengers > 50) ? "PEAK HOURS DETECTED" : "OFF-PEAK";
+    std::cout << "Peak Status: " << peakStatus << "\n";
+    
+    if (totalPassengers > 50) {
+        std::cout << "Special Trains Activated: YES\n";
+        std::cout << "Headway Reduced To: 10 minutes\n";
+        std::cout << "Additional Capacity: +35%\n";
+    } else {
+        std::cout << "Special Trains Activated: NO\n";
+        std::cout << "Standard Headway: 15-20 minutes\n";
+        std::cout << "Operating Capacity: 100%\n";
+    }
+    std::cout << "\n";
+    
     // System health
-    std::cout << "\n🏥 SYSTEM HEALTH:\n";
+    std::cout << "🏥 SYSTEM HEALTH:\n";
     std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
     std::cout << "✓ Network Status: OPERATIONAL\n";
     std::cout << "✓ All Lines: ACTIVE\n";
     std::cout << "✓ Ticketing System: ONLINE\n";
     std::cout << "✓ Real-time Tracking: ENABLED\n";
+    std::cout << "✓ Platform Allocation: ACTIVE\n";
+    std::cout << "✓ Emergency Services: STANDBY\n";
     
     std::cout << "══════════════════════════════════════════════════════════\n\n";
 }
