@@ -1,0 +1,46 @@
+StationID,StationName,Line,Platforms,AvgDailyPassengers
+1,Churchgate,Western,4,850000
+2,Marine Lines,Western,2,420000
+3,Charni Road,Western,2,390000
+4,Grant Road,Western,2,360000
+5,Mumbai Central,Western,6,1200000
+6,Mahalaxmi,Western,4,500000
+7,Lower Parel,Western,4,700000
+8,Dadar,Western,8,1500000
+9,Matunga Road,Western,4,650000
+10,Bandra,Western,6,1100000
+11,Andheri,Western,8,1400000
+12,Jogeshwari,Western,4,550000
+13,Goregaon,Western,6,800000
+14,Malad,Western,6,900000
+15,Borivali,Western,6,1000000
+16,Dahisar,Western,4,750000
+17,Virar,Western,8,900000
+18,CST,Central,10,1800000
+19,Masjid,Central,2,300000
+20,Sandhurst Road,Central,4,350000
+21,Byculla,Central,4,450000
+22,Chinchpokli,Central,4,380000
+23,Currey Road,Central,4,360000
+24,Parel,Central,4,500000
+25,Dadar Central,Central,8,1400000
+26,Matunga,Central,4,600000
+27,Sion,Central,4,650000
+28,Kurla,Central,8,1300000
+29,Ghatkopar,Central,6,1200000
+30,Vikhroli,Central,4,700000
+31,Bhandup,Central,4,750000
+32,Mulund,Central,4,800000
+33,Thane,Central,8,1600000
+34,Dombivli,Central,8,1500000
+35,Kalyan,Central,8,1700000
+36,Dockyard Road,Harbour,4,300000
+37,Reay Road,Harbour,2,250000
+38,Cotton Green,Harbour,2,270000
+39,Sewri,Harbour,4,350000
+40,Wadala Road,Harbour,6,600000
+41,Chembur,Harbour,4,700000
+42,Govandi,Harbour,4,650000
+43,Vashi,Harbour,6,900000
+44,Nerul,Harbour,4,700000
+45,Panvel,Harbour,8,1100000
