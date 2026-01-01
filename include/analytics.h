@@ -1,0 +1,43 @@
+/**
+ * ======================================================================================
+ * HEADER: analytics.h
+ * DESCRIPTION: Station search using BST and analytics helper functions
+ * ======================================================================================
+ */
+
+#ifndef ANALYTICS_H
+#define ANALYTICS_H
+
+#include <string>
+
+// ======================================================================================
+//                                   STATION BST CLASS
+// ======================================================================================
+
+/**
+ * Binary Search Tree for Station Search
+ */
+class StationBST {
+    struct Node {
+        std::string name;
+        int id;
+        Node* left;
+        Node* right;
+        Node(std::string n, int i);
+    };
+
+    Node* root;
+
+    Node* insert(Node* node, std::string name, int id);
+    Node* search(Node* node, std::string name);
+    void inorder(Node* node);
+
+public:
+    StationBST();
+    
+    void addStation(std::string name, int id);
+    int getStationId(std::string name);
+    void listStations();
+};
+
+#endif // ANALYTICS_H
