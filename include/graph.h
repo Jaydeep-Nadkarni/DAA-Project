@@ -29,6 +29,12 @@ struct Edge {
 
 /**
  * Graph & Navigation System using Custom MyStack and MyQueue
+ * 
+ * Key Features:
+ * - Dijkstra's Algorithm for shortest path (uses Custom MyStack)
+ * - BFS for connectivity check (uses Custom MyQueue)
+ * - Track management for emergency scenarios
+ * - Bidirectional graph representation
  */
 class RailwayNetwork {
     int V; // Number of vertices (stations)
@@ -36,10 +42,16 @@ class RailwayNetwork {
 public:
     RailwayNetwork(int v);
     
+    // Track Management
     void addTrack(int u, int v, int w, LineType line);
-    void findFastestRoute(int src, int dest);
-    void showConnectivity(int startNode);
     void blockTrack(int u, int v);
+    
+    // Path Finding Algorithms
+    void findFastestRoute(int src, int dest);  // Uses Dijkstra + Custom MyStack
+    
+    // Network Analysis
+    void showConnectivity(int startNode);      // Uses BFS + Custom MyQueue
+    void displayNetworkStats();                // Display graph statistics
 };
 
 #endif // GRAPH_H

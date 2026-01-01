@@ -153,19 +153,36 @@ public:
 
 /**
  * Circular Queue for Platform Load Balancing
+ * 
+ * Implementation: Array-based circular queue
+ * Features:
+ * - Fixed capacity with overflow detection
+ * - O(1) enqueue and dequeue operations
+ * - Circular indexing using modulo arithmetic
+ * - Memory management with destructor
+ * 
+ * Use Case: Managing trains waiting for platform allocation at busy stations
  */
 class PlatformQueue {
-    int *arr;
-    int front, rear, size, capacity;
+    int *arr;              // Dynamic array to store train IDs
+    int front;             // Index of front element
+    int rear;              // Index of rear element
+    int size;              // Current number of elements
+    int capacity;          // Maximum capacity
 
 public:
     PlatformQueue(int cap = 5);
     ~PlatformQueue() { delete[] arr; }
 
-    bool isFull();
-    bool isEmpty();
-    void enqueue(int trainId);
-    int dequeue();
+    // Queue Operations
+    bool isFull();                 // Check if queue is at capacity
+    bool isEmpty();                // Check if queue is empty
+    void enqueue(int trainId);     // Add train to queue
+    int dequeue();                 // Remove and return train from queue
+    
+    // Getters for monitoring
+    int getSize() const { return size; }
+    int getCapacity() const { return capacity; }
 };
 
 #endif // QUEUE_MANAGER_H
