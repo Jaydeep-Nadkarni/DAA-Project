@@ -14,38 +14,7 @@
 
 // Forward declaration
 class TicketSystem;
-
-// ======================================================================================
-//                                   STATION BST CLASS
-// ======================================================================================
-
-/**
- * Binary Search Tree for Station Search
- */
-class StationBST {
-    struct Node {
-        std::string name;
-        int id;
-        Node* left;
-        Node* right;
-        Node(std::string n, int i);
-    };
-
-    Node* root;
-
-    Node* insert(Node* node, std::string name, int id);
-    Node* search(Node* node, std::string name);
-    void inorder(Node* node);
-    void collectMatching(Node* node, const std::string& prefix, std::vector<std::pair<std::string, int>>& results);
-
-public:
-    StationBST();
-    
-    void addStation(std::string name, int id);
-    int getStationId(std::string name);
-    void listStations();
-    std::vector<std::pair<std::string, int>> listMatchingStations(std::string prefix);
-};
+class StationBST;  // Forward declaration - defined in station.h
 
 // ======================================================================================
 //                                   ANALYTICS FUNCTIONS

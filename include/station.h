@@ -10,6 +10,7 @@
 
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "queue_manager.h"
 
 // Forward declaration
@@ -48,8 +49,53 @@ struct Station {
 //                                   HELPER FUNCTIONS
 // ======================================================================================
 
+// ======================================================================================
+//                               STATION BST CLASS
+// ======================================================================================
+
+class StationBST {
+private:
+    struct BSTNode {
+        std::string name;        // Original case-preserved name
+        std::string nameLower;   // Lowercase for comparisons
+        int stationId;
+        BSTNode* left;
+        BSTNode* right;
+        
+        BSTNode(const std::string& _name, int _id)
+            : name(_name), stationId(_id), left(nullptr), right(nullptr) {
+            nameLower = _name;
+            std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+        }
+    };
+    
+    BSTNode* root;
+    
+    void insertHelper(BSTNode*& node, const std::string& name, int id);
+    int searchHelper(BSTNode* node, const std::string& name) const;
+    void listHelper(BSTNode* node) const;
+    void matchHelper(BSTNode* node, const std::string& prefix, 
+                    std::vector<std::pair<std::string, int>>& results, int& count) const;
+    void deleteHelper(BSTNode*& node);
+    
+public:
+    StationBST() : root(nullptr) {}
+    ~StationBST() { deleteHelper(root); }
+    
+    // Add a station to the BST
+    void addStation(const std::string& name, int stationId);
+    
+    // Get station ID by name (case-insensitive)
+    int getStationId(const std::string& name) const;
+    
+    // List all stations in lexical order
+    void listStations() const;
+    
+    // Get up to 10 stations matching a prefix (case-insensitive, lexical order)
+    std::vector<std::pair<std::string, int>> listMatchingStations(const std::string& prefix) const;
+};
+
 // Forward declarations
-class StationBST;
 class RailwayNetwork;
 
 std::string getLineName(LineType l);

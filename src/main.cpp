@@ -431,6 +431,7 @@ void handleTicketing() {
 /**
  * Function: handleTrackFailure
  * Reports and blocks a track between two stations
+ * Uses suggestion flow when station lookup fails
  */
 void handleTrackFailure() {
     string station1, station2;
@@ -440,17 +441,43 @@ void handleTrackFailure() {
     cout << "Enter first station: ";
     cin.ignore();
     getline(cin, station1);
+    
+    // Convert to lowercase for lookup
+    string station1Lower = station1;
+    std::transform(station1Lower.begin(), station1Lower.end(), station1Lower.begin(), ::tolower);
+    
+    int id1 = stationDirectory.getStationId(station1Lower);
+    
+    // If first station not found, show suggestions
+    if (id1 == -1) {
+        cout << "\n❌ Station not found: " << station1 << "\n";
+        id1 = showStationSuggestions(station1);
+        if (id1 == -1) {
+            cout << "Track failure report cancelled.\n";
+            return;
+        }
+    }
+    
     cout << "Enter second station: ";
     getline(cin, station2);
     
-    int id1 = stationDirectory.getStationId(station1);
-    int id2 = stationDirectory.getStationId(station2);
+    // Convert to lowercase for lookup
+    string station2Lower = station2;
+    std::transform(station2Lower.begin(), station2Lower.end(), station2Lower.begin(), ::tolower);
     
-    if (id1 == -1 || id2 == -1) {
-        cout << "\n❌ Invalid station name(s).\n";
-        return;
+    int id2 = stationDirectory.getStationId(station2Lower);
+    
+    // If second station not found, show suggestions
+    if (id2 == -1) {
+        cout << "\n❌ Station not found: " << station2 << "\n";
+        id2 = showStationSuggestions(station2);
+        if (id2 == -1) {
+            cout << "Track failure report cancelled.\n";
+            return;
+        }
     }
     
+    // Both stations resolved, proceed to block track
     mumbaiLocal->blockTrack(id1, id2);
 }
 
@@ -511,6 +538,12 @@ void simulatePassengerLoad() {
 // ======================================================================================
 
 int main() {
+    // Enable UTF-8 console output on Windows
+    #ifdef _WIN32
+        // Set console code page to UTF-8
+        system("chcp 65001 > nul 2>&1");
+    #endif
+    
     // Seed random number generator
     srand(time(0));
     

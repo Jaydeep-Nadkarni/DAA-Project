@@ -15,6 +15,111 @@
 #include <iostream>
 
 // ======================================================================================
+//                               STATION BST IMPLEMENTATION
+// ======================================================================================
+
+void StationBST::insertHelper(BSTNode*& node, const std::string& name, int id) {
+    if (node == nullptr) {
+        node = new BSTNode(name, id);
+        return;
+    }
+    
+    // Lowercase comparison for BST ordering
+    std::string nameLower = name;
+    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+    
+    if (nameLower < node->nameLower) {
+        insertHelper(node->left, name, id);
+    } else {
+        insertHelper(node->right, name, id);
+    }
+}
+
+int StationBST::searchHelper(BSTNode* node, const std::string& name) const {
+    if (node == nullptr) {
+        return -1;
+    }
+    
+    std::string nameLower = name;
+    std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+    
+    if (nameLower == node->nameLower) {
+        return node->stationId;
+    } else if (nameLower < node->nameLower) {
+        return searchHelper(node->left, name);
+    } else {
+        return searchHelper(node->right, name);
+    }
+}
+
+void StationBST::listHelper(BSTNode* node) const {
+    if (node == nullptr) return;
+    
+    listHelper(node->left);
+    std::cout << "  " << node->name << " (ID: " << node->stationId << ")\n";
+    listHelper(node->right);
+}
+
+void StationBST::matchHelper(BSTNode* node, const std::string& prefix,
+                             std::vector<std::pair<std::string, int>>& results, 
+                             int& count) const {
+    if (node == nullptr || count >= 10) return;
+    
+    // In-order traversal for lexical order
+    matchHelper(node->left, prefix, results, count);
+    
+    if (count < 10) {
+        std::string nameLower = node->nameLower;
+        std::string prefixLower = prefix;
+        std::transform(prefixLower.begin(), prefixLower.end(), prefixLower.begin(), ::tolower);
+        
+        if (nameLower.substr(0, prefixLower.length()) == prefixLower) {
+            results.push_back({node->name, node->stationId});
+            count++;
+        }
+    }
+    
+    if (count < 10) {
+        matchHelper(node->right, prefix, results, count);
+    }
+}
+
+void StationBST::deleteHelper(BSTNode*& node) {
+    if (node == nullptr) return;
+    deleteHelper(node->left);
+    deleteHelper(node->right);
+    delete node;
+    node = nullptr;
+}
+
+void StationBST::addStation(const std::string& name, int stationId) {
+    insertHelper(root, name, stationId);
+}
+
+int StationBST::getStationId(const std::string& name) const {
+    return searchHelper(root, name);
+}
+
+void StationBST::listStations() const {
+    if (root == nullptr) {
+        std::cout << "No stations in directory.\n";
+        return;
+    }
+    
+    std::cout << "\n┌────────────────────────────────────────────────────────┐\n";
+    std::cout << "│           ALL STATIONS (LEXICAL ORDER)                 │\n";
+    std::cout << "└────────────────────────────────────────────────────────┘\n";
+    listHelper(root);
+}
+
+std::vector<std::pair<std::string, int>> StationBST::listMatchingStations(const std::string& prefix) const {
+    std::vector<std::pair<std::string, int>> results;
+    int count = 0;
+    matchHelper(root, prefix, results, count);
+    return results;
+}
+
+// ======================================================================================
 //                                   GLOBAL VARIABLE DEFINITIONS
 // ======================================================================================
 
