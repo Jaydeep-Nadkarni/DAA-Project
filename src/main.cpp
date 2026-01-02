@@ -84,34 +84,6 @@ void initializeSystem() {
     cout << "         SYSTEM INITIALIZATION IN PROGRESS...          \n";
     cout << "========================================================\n\n";
     
-    // Step 1: Create railway network graph
-    cout << "[1/5] Creating railway network graph...\n";
-    mumbaiLocal = new RailwayNetwork(100);
-    
-    // Step 2: Initialize stations with BST and graph
-    cout << "[2/5] Initializing stations across all lines...\n";
-    initializeStations(stationDirectory, mumbaiLocal);
-    
-    // Step 3: Schedule initial trains
-    cout << "[3/5] Scheduling initial trains...\n";
-    
-    // Morning trains
-    trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["churchgate"]);   // 6:00 AM
-    trainScheduler.scheduleTrain(102, "Virar Slow", 375, stationNameToId["virar"]);            // 6:15 AM
-    trainScheduler.scheduleTrain(103, "CST Express", 420, stationNameToId["cst"]);             // 7:00 AM
-    trainScheduler.scheduleTrain(104, "Kalyan Local", 450, stationNameToId["kalyan"]);         // 7:30 AM
-    
-    // Peak hour trains
-    trainScheduler.scheduleTrain(201, "Dadar Special", 480, stationNameToId["dadar"]);         // 8:00 AM
-    trainScheduler.scheduleTrain(202, "Andheri Fast", 510, stationNameToId["andheri"]);        // 8:30 AM
-    trainScheduler.scheduleTrain(203, "Harbour Express", 540, stationNameToId["panvel"]);      // 9:00 AM
-    
-    // Step 4: Assign some trains to platform queue
-    cout << "[4/5] Allocating platforms...\n";
-    platformManager.enqueue(101);
-    platformManager.enqueue(102);
-    platformManager.enqueue(103);
-    
     cout << "\n✓ System initialization complete!\n";
     cout << "✓ Total Stations: " << allStations.size() << "\n";
     cout << "✓ Trains Scheduled: 7\n";
@@ -119,53 +91,145 @@ void initializeSystem() {
 }
 
 // ======================================================================================
+//                                   LOGIN SYSTEM
+// ======================================================================================
+
+/**
+ * Function: authenticateUser
+ * Displays login screen and validates credentials
+ * Returns true if authentication successful, false otherwise
+ */
+bool authenticateUser() {
+    string username, password;
+    int attempts = 0;
+    const int MAX_ATTEMPTS = 3;
+    
+    while (attempts < MAX_ATTEMPTS) {
+        cout << "\n╔════════════════════════════════════════════════════════╗\n";
+        cout << "║                                                        ║\n";
+        cout << "║     MUMBAI LOCAL TRANSPORTATION MANAGEMENT SYSTEM      ║\n";
+        cout << "║                   LOGIN REQUIRED                       ║\n";
+        cout << "║                                                        ║\n";
+        cout << "╚════════════════════════════════════════════════════════╝\n\n";
+        
+        cout << "  👤 Username: ";
+        cin >> username;
+        cout << "  🔒 Password: ";
+        cin >> password;
+        
+        if (username == "jaydeep" && password == "KLE@123") {
+            cout << "\n╔════════════════════════════════════════════════════════╗\n";
+            cout << "║          ✓ LOGIN SUCCESSFUL                            ║\n";
+            cout << "║          Welcome, " << left << setw(35) << username << "║\n";
+            cout << "╚════════════════════════════════════════════════════════╝\n";
+            return true;
+        } else {
+            attempts++;
+            cout << "\n  ❌ Invalid credentials! ";
+            if (attempts < MAX_ATTEMPTS) {
+                cout << "(" << (MAX_ATTEMPTS - attempts) << " attempt(s) remaining)\n";
+            } else {
+                cout << "\n\n╔════════════════════════════════════════════════════════╗\n";
+                cout << "║          ⚠️  ACCESS DENIED                             ║\n";
+                cout << "║          Maximum login attempts exceeded               ║\n";
+                cout << "╚════════════════════════════════════════════════════════╝\n\n";
+                return false;
+            }
+        }
+    }
+    return false;
+}
+
+// ======================================================================================
 //                                   MENU DISPLAY
 // ======================================================================================
 
 /**
- * Function: displayMenu
- * Displays the main menu interface
- * 
- * Menu Options:
- * 1. Station Management (BST operations)
- * 2. Route Finding (Graph algorithms)
- * 3. Ticketing (Queue management)
- * 4. Train Scheduling (Heap operations)
- * 5. Platform Management (Circular queue)
- * 6. Analytics & Reports
- * 7. System Administration
- * 8. Exit
+ * Function: displayMainMenu
+ * Displays the main menu with 4 primary categories
  */
-void displayMenu() {
-    cout << "\n========================================================\n";
-    cout << "     MUMBAI LOCAL TRANSPORTATION MANAGEMENT SYSTEM      \n";
-    cout << "========================================================\n";
-    cout << "\n[STATION & ROUTE MANAGEMENT]\n";
+void displayMainMenu() {
+    cout << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║     MUMBAI LOCAL TRANSPORTATION MANAGEMENT SYSTEM      ║\n";
+    cout << "║                    MAIN MENU                           ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n";
+    cout << "  1. staion & Route Management\n";
+    cout << "  2. Ticketing & Passenger Services\n";
+    cout << "  3. Train Operations & Analytics\n";
+    cout << "  4. System Administration\n";
+    cout << "  0. Exit System\n";
+    cout << "\n────────────────────────────────────────────────────────\n";
+    cout << "Enter your choice: ";
+}
+
+/**
+ * Function: displayStationMenu
+ * Displays Station & Route Management submenu
+ */
+void displayStationMenu() {
+    cout << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║          STATION & ROUTE MANAGEMENT                 ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n";
     cout << "  1. View All Stations (BST Traversal)\n";
     cout << "  2. Search Station (BST Search)\n";
-    cout << "  3. Find Fastest Route (Dijkstra)\n";
+    cout << "  3. Find Fastest Route (Dijkstra Algorithm)\n";
     cout << "  4. Check Network Connectivity (BFS)\n";
-    cout << "\n[TICKETING & PASSENGER MANAGEMENT]\n";
-    cout << "  5. Buy Ticket (Multi-Queue Processing)\n";
-    cout << "  6. View Ticketing Statistics\n";
-    cout << "\n[TRAIN SCHEDULING & PLATFORMS]\n";
-    cout << "  7. View Train Schedule (Min Heap)\n";
-    cout << "  8. Optimize Peak Hour Frequency\n";
-    cout << "  9. Process Platform Queue\n";
-    cout << "\n[ANALYTICS & REPORTS]\n";
-    cout << "  10. Passenger Flow Analytics\n";
-    cout << "  11. Station Congestion Report\n";
-    cout << "  12. Peak Hour Statistics\n";
-    cout << "  13. Comprehensive Dashboard\n";
-    cout << "  17. Realtime Dashboard (Enhanced Analytics)\n";
-    cout << "\n[ADMINISTRATION & EMERGENCY]\n";
-    cout << "  14. Report Track Failure (Block Track)\n";
-    cout << "  15. Display Network Statistics\n";
-    cout << "  16. Simulate Passenger Load\n";
-    cout << "\n[EXIT]\n";
-    cout << "  0. Exit System\n";
-    cout << "========================================================\n";
-    cout << "\nEnter your choice: ";
+    cout << "  0. ← Return to Main Menu\n";
+    cout << "\n────────────────────────────────────────────────────────\n";
+    cout << "Enter your choice: ";
+}
+
+/**
+ * Function: displayTicketingMenu
+ * Displays Ticketing & Passenger Services submenu
+ */
+void displayTicketingMenu() {
+    cout << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║        TICKETING & PASSENGER SERVICES               ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n";
+    cout << "  1. Buy Ticket (Multi-Queue Processing)\n";
+    cout << "  2. Process Ticket Queues\n";
+    cout << "  3. View Ticketing Statistics\n";
+    cout << "  4. Simulate Passenger Load\n";
+    cout << "  0. ← Return to Main Menu\n";
+    cout << "\n────────────────────────────────────────────────────────\n";
+    cout << "Enter your choice: ";
+}
+
+/**
+ * Function: displayTrainOpsMenu
+ * Displays Train Operations & Analytics submenu
+ */
+void displayTrainOpsMenu() {
+    cout << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║         TRAIN OPERATIONS & ANALYTICS                ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n";
+    cout << "  1. View Train Schedule (Min Heap)\n";
+    cout << "  2. Optimize Peak Hour Frequency\n";
+    cout << "  3. Process Platform Queue\n";
+    cout << "  4. Passenger Flow Analytics\n";
+    cout << "  5. Station Congestion Report\n";
+    cout << "  6. Peak Hour Statistics\n";
+    cout << "  7. Comprehensive Dashboard\n";
+    cout << "  0. ← Return to Main Menu\n";
+    cout << "\n────────────────────────────────────────────────────────\n";
+    cout << "Enter your choice: ";
+}
+
+/**
+ * Function: displayAdminMenu
+ * Displays System Administration submenu
+ */
+void displayAdminMenu() {
+    cout << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║            SYSTEM ADMINISTRATION                    ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n";
+    cout << "  1. Report Track Failure (Block Track)\n";
+    cout << "  2. Display Network Statistics\n";
+    cout << "  3. Emergency Services\n";
+    cout << "  0. ← Return to Main Menu\n";
+    cout << "\n────────────────────────────────────────────────────────\n";
+    cout << "Enter your choice: ";
 }
 
 // ======================================================================================
@@ -547,16 +611,21 @@ int main() {
     // Seed random number generator
     srand(time(0));
     
+    // Authenticate user
+    if (!authenticateUser()) {
+        return 1;  // Exit if authentication fails
+    }
+    
     // Initialize the entire system
     initializeSystem();
     
-    int choice;
+    int mainChoice, subChoice;
     bool running = true;
     
     // Main menu loop
     while (running) {
-        displayMenu();
-        cin >> choice;
+        displayMainMenu();
+        cin >> mainChoice;
         
         // Clear any input errors
         if (cin.fail()) {
@@ -566,151 +635,253 @@ int main() {
             continue;
         }
         
-        switch (choice) {
-            case 1:
-                // View all stations (BST traversal)
-                stationDirectory.listStations();
-                break;
-                
-            case 2:
-                // Search for a specific station
-                handleStationSearch();
-                break;
-                
-            case 3:
-                // Find fastest route
-                handleRouteSearch();
-                break;
-                
-            case 4:
-                // Check network connectivity
-                handleConnectivityCheck();
-                break;
-                
-            case 5:
-                // Buy ticket
-                handleTicketing();
-                break;
-                
-            case 6:
-                // View ticketing statistics
-                ticketMachine.showStats();
-                break;
-                
-            case 7:
-                // View train schedule at a station
+        switch (mainChoice) {
+            case 1: // Station & Route Management
                 {
-                    cout << "\n┌────────────────────────────────────────────────────────┐\n";
-                    cout << "│            VIEW TRAINS AT STATION                       │\n";
-                    cout << "└────────────────────────────────────────────────────────┘\n";
-                    cout << "Enter station name: ";
-                    cin.ignore();
-                    string stationName;
-                    getline(cin, stationName);
-                    
-                    // Convert to lowercase for lookup
-                    string stationNameLower = stationName;
-                    std::transform(stationNameLower.begin(), stationNameLower.end(), 
-                                   stationNameLower.begin(), ::tolower);
-                    
-                    int stationId = -1;
-                    if (stationNameToId.find(stationNameLower) != stationNameToId.end()) {
-                        stationId = stationNameToId[stationNameLower];
-                    }
-                    
-                    if (stationId == -1) {
-                        cout << "\n❌ Invalid station: " << stationName << "\n";
-                        stationId = showStationSuggestions(stationName);
-                        if (stationId == -1) break;
-                    }
-                    
-                    trainScheduler.showTrainsAtStation(stationId);
-                }
-                break;
-                
-            case 8:
-                // Optimize for peak hours: Find max congestion station and add specials
-                {
-                    cout << "\n┌────────────────────────────────────────────────────────┐\n";
-                    cout << "│           PEAK HOUR FREQUENCY OPTIMIZATION             │\n";
-                    cout << "└────────────────────────────────────────────────────────┘\n";
-                    
-                    // Find station with maximum passenger count
-                    int maxPassengerStation = 0;
-                    int maxPassengers = 0;
-                    
-                    for (int i = 0; i < (int)allStations.size(); i++) {
-                        if (allStations[i].passengerCount > maxPassengers) {
-                            maxPassengers = allStations[i].passengerCount;
-                            maxPassengerStation = i;
+                    bool inSubmenu = true;
+                    while (inSubmenu) {
+                        displayStationMenu();
+                        cin >> subChoice;
+                        
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "\n❌ Invalid input.\n";
+                            continue;
+                        }
+                        
+                        switch (subChoice) {
+                            case 1:
+                                stationDirectory.listStations();
+                                break;
+                            case 2:
+                                handleStationSearch();
+                                break;
+                            case 3:
+                                handleRouteSearch();
+                                break;
+                            case 4:
+                                handleConnectivityCheck();
+                                break;
+                            case 0:
+                                inSubmenu = false;
+                                break;
+                            default:
+                                cout << "\n❌ Invalid choice. Please select 0-4.\n";
+                                break;
+                        }
+                        
+                        if (inSubmenu && subChoice != 0) {
+                            cout << "\nPress Enter to continue...";
+                            cin.ignore();
+                            cin.get();
                         }
                     }
-                    
-                    cout << "\nPeak Station Analysis:\n";
-                    cout << "Peak Station: " << allStations[maxPassengerStation].name 
-                         << " (Passengers: " << maxPassengers << ")\n\n";
-                    
-                    // Add special trains to peak station
-                    trainScheduler.optimizeFrequency(true);
-                    
-                    // Allocate platforms realtime for special trains
-                    cout << "\nRealtime Platform Allocation:\n";
-                    if (platformManager.getSize() < platformManager.getCapacity()) {
-                        platformManager.enqueue(901);  // Peak Special 1
-                        platformManager.enqueue(902);  // Peak Special 2
-                        platformManager.enqueue(903);  // Peak Special 3
-                        cout << "✓ Allocated platforms for peak specials\n";
-                        cout << "  Platform Queue: " << platformManager.getSize() 
-                             << "/" << platformManager.getCapacity() << " (Trains waiting)\n";
-                    } else {
-                        cout << "⚠ Platform queue full, cannot allocate more trains\n";
+                }
+                break;
+                
+            case 2: // Ticketing & Passenger Services
+                {
+                    bool inSubmenu = true;
+                    while (inSubmenu) {
+                        displayTicketingMenu();
+                        cin >> subChoice;
+                        
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "\n❌ Invalid input.\n";
+                            continue;
+                        }
+                        
+                        switch (subChoice) {
+                            case 1:
+                                handleTicketing();
+                                break;
+                            case 2:
+                                ticketMachine.processQueues();
+                                break;
+                            case 3:
+                                ticketMachine.showStats();
+                                break;
+                            case 4:
+                                simulatePassengerLoad();
+                                break;
+                            case 0:
+                                inSubmenu = false;
+                                break;
+                            default:
+                                cout << "\n❌ Invalid choice. Please select 0-4.\n";
+                                break;
+                        }
+                        
+                        if (inSubmenu && subChoice != 0) {
+                            cout << "\nPress Enter to continue...";
+                            cin.ignore();
+                            cin.get();
+                        }
                     }
                 }
                 break;
                 
-            case 9:
-                // Process platform queue
-                handlePlatformQueue();
+            case 3: // Train Operations & Analytics
+                {
+                    bool inSubmenu = true;
+                    while (inSubmenu) {
+                        displayTrainOpsMenu();
+                        cin >> subChoice;
+                        
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "\n❌ Invalid input.\n";
+                            continue;
+                        }
+                        
+                        switch (subChoice) {
+                            case 1:
+                                // View train schedule at a station
+                                {
+                                    cout << "\n┌────────────────────────────────────────────────────────┐\n";
+                                    cout << "│            VIEW TRAINS AT STATION                       │\n";
+                                    cout << "└────────────────────────────────────────────────────────┘\n";
+                                    cout << "Enter station name: ";
+                                    cin.ignore();
+                                    string stationName;
+                                    getline(cin, stationName);
+                                    
+                                    string stationNameLower = stationName;
+                                    std::transform(stationNameLower.begin(), stationNameLower.end(), 
+                                                   stationNameLower.begin(), ::tolower);
+                                    
+                                    int stationId = -1;
+                                    if (stationNameToId.find(stationNameLower) != stationNameToId.end()) {
+                                        stationId = stationNameToId[stationNameLower];
+                                    }
+                                    
+                                    if (stationId == -1) {
+                                        cout << "\n❌ Invalid station: " << stationName << "\n";
+                                        stationId = showStationSuggestions(stationName);
+                                        if (stationId == -1) break;
+                                    }
+                                    
+                                    trainScheduler.showTrainsAtStation(stationId);
+                                }
+                                break;
+                                
+                            case 2:
+                                // Optimize for peak hours
+                                {
+                                    cout << "\n┌────────────────────────────────────────────────────────┐\n";
+                                    cout << "│           PEAK HOUR FREQUENCY OPTIMIZATION             │\n";
+                                    cout << "└────────────────────────────────────────────────────────┘\n";
+                                    
+                                    int maxPassengerStation = 0;
+                                    int maxPassengers = 0;
+                                    
+                                    for (int i = 0; i < (int)allStations.size(); i++) {
+                                        if (allStations[i].passengerCount > maxPassengers) {
+                                            maxPassengers = allStations[i].passengerCount;
+                                            maxPassengerStation = i;
+                                        }
+                                    }
+                                    
+                                    cout << "\nPeak Station Analysis:\n";
+                                    cout << "Peak Station: " << allStations[maxPassengerStation].name 
+                                         << " (Passengers: " << maxPassengers << ")\n\n";
+                                    
+                                    trainScheduler.optimizeFrequency(true);
+                                    
+                                    cout << "\nRealtime Platform Allocation:\n";
+                                    if (platformManager.getSize() < platformManager.getCapacity()) {
+                                        platformManager.enqueue(901);
+                                        platformManager.enqueue(902);
+                                        platformManager.enqueue(903);
+                                        cout << "✓ Allocated platforms for peak specials\n";
+                                        cout << "  Platform Queue: " << platformManager.getSize() 
+                                             << "/" << platformManager.getCapacity() << " (Trains waiting)\n";
+                                    } else {
+                                        cout << "⚠ Platform queue full, cannot allocate more trains\n";
+                                    }
+                                }
+                                break;
+                                
+                            case 3:
+                                handlePlatformQueue();
+                                break;
+                            case 4:
+                                displayPassengerFlowAnalytics();
+                                break;
+                            case 5:
+                                displayCongestionReport();
+                                break;
+                            case 6:
+                                displayPeakHourStatistics();
+                                break;
+                            case 7:
+                                displayComprehensiveAnalytics(ticketMachine);
+                                break;
+                            case 0:
+                                inSubmenu = false;
+                                break;
+                            default:
+                                cout << "\n❌ Invalid choice. Please select 0-7.\n";
+                                break;
+                        }
+                        
+                        if (inSubmenu && subChoice != 0) {
+                            cout << "\nPress Enter to continue...";
+                            cin.ignore();
+                            cin.get();
+                        }
+                    }
+                }
                 break;
                 
-            case 10:
-                // Passenger flow analytics
-                displayPassengerFlowAnalytics();
-                break;
-                
-            case 11:
-                // Station congestion report
-                displayCongestionReport();
-                break;
-                
-            case 12:
-                // Peak hour statistics
-                displayPeakHourStatistics();
-                break;
-                
-            case 13:
-                // Comprehensive dashboard
-                displayComprehensiveAnalytics(ticketMachine);
-                break;
-                
-            case 14:
-                // Report track failure
-                handleTrackFailure();
-                break;
-                
-            case 15:
-                // Display network statistics
-                mumbaiLocal->displayNetworkStats();
-                break;
-                
-            case 16:
-                // Simulate passenger load
-                simulatePassengerLoad();
-                break;
-                
-            case 17:
-                // Realtime dashboard with enhanced analytics
-                displayComprehensiveAnalytics(ticketMachine);
+            case 4: // System Administration
+                {
+                    bool inSubmenu = true;
+                    while (inSubmenu) {
+                        displayAdminMenu();
+                        cin >> subChoice;
+                        
+                        if (cin.fail()) {
+                            cin.clear();
+                            cin.ignore(10000, '\n');
+                            cout << "\n❌ Invalid input.\n";
+                            continue;
+                        }
+                        
+                        switch (subChoice) {
+                            case 1:
+                                handleTrackFailure();
+                                break;
+                            case 2:
+                                mumbaiLocal->displayNetworkStats();
+                                break;
+                            case 3:
+                                cout << "\n╔════════════════════════════════════════════════════════╗\n";
+                                cout << "║              🚨 EMERGENCY SERVICES                     ║\n";
+                                cout << "╚════════════════════════════════════════════════════════╝\n";
+                                cout << "\n✓ Emergency protocols activated\n";
+                                cout << "✓ Alert dispatched to control center\n";
+                                cout << "✓ Emergency services on standby\n";
+                                break;
+                            case 0:
+                                inSubmenu = false;
+                                break;
+                            default:
+                                cout << "\n❌ Invalid choice. Please select 0-3.\n";
+                                break;
+                        }
+                        
+                        if (inSubmenu && subChoice != 0) {
+                            cout << "\nPress Enter to continue...";
+                            cin.ignore();
+                            cin.get();
+                        }
+                    }
+                }
                 break;
                 
             case 0:
@@ -723,15 +894,11 @@ int main() {
                 break;
                 
             default:
-                cout << "\n❌ Invalid choice. Please select a valid option (0-17).\n";
+                cout << "\n❌ Invalid choice. Please select a valid option (0-4).\n";
+                cout << "\nPress Enter to continue...";
+                cin.ignore();
+                cin.get();
                 break;
-        }
-        
-        // Pause before showing menu again
-        if (running) {
-            cout << "\nPress Enter to continue...";
-            cin.ignore();
-            cin.get();
         }
     }
     
