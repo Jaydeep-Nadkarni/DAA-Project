@@ -170,7 +170,7 @@ void TicketSystem::processTicket(Passenger p) {
     std::cout << std::endl;
     
     // Update station analytics (passenger flow tracking)
-    if (p.sourceId >= 0 && p.sourceId < allStations.size()) {
+    if (p.sourceId >= 0 && (size_t)p.sourceId < allStations.size()) {
         allStations[p.sourceId].passengerCount++;
     }
 }

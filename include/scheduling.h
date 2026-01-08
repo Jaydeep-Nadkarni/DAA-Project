@@ -60,8 +60,8 @@ class MinHeap {
         int right = 2 * index + 2;
         int smallest = index;
 
-        if (left < heap.size() && heap[left] < heap[smallest]) smallest = left;
-        if (right < heap.size() && heap[right] < heap[smallest]) smallest = right;
+        if (left < (int)heap.size() && heap[left] < heap[smallest]) smallest = left;
+        if (right < (int)heap.size() && heap[right] < heap[smallest]) smallest = right;
 
         if (smallest != index) {
             std::swap(heap[index], heap[smallest]);

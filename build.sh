@@ -79,6 +79,7 @@ compile_sources() {
         "scheduling"
         "queue_manager"
         "analytics"
+        "csv_manager"
     )
     
     for src in "${sources[@]}"; do

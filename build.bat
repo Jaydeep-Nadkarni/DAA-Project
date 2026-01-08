@@ -56,6 +56,9 @@ if %ERRORLEVEL% NEQ 0 goto :error
 g++ -c src\analytics.cpp -I include -o obj\analytics.o -std=c++11 -O2 -Wall
 if %ERRORLEVEL% NEQ 0 goto :error
 
+g++ -c src\csv_manager.cpp -I include -o obj\csv_manager.o -std=c++11 -O2 -Wall
+if %ERRORLEVEL% NEQ 0 goto :error
+
 echo.
 echo [3/3] Linking executable...
 

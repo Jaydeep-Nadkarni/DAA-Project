@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <map>
 #include <ctime>
+#include "../include/colors.h"
 
 // ======================================================================================
 //                                   PASSENGER FLOW ANALYTICS
@@ -159,35 +160,35 @@ void displayCongestionReport() {
     }
     
     // Display congestion summary
-    std::cout << "📊 CONGESTION SUMMARY:\n";
+    std::cout << BOLDCYAN << "📊 CONGESTION SUMMARY:\n" << RESET;
     std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
-    std::cout << "🟢 LOW (< 50):        " << lowCongestion.size() << " stations\n";
-    std::cout << "🟡 MEDIUM (50-99):    " << mediumCongestion.size() << " stations\n";
-    std::cout << "🟠 HIGH (100-199):    " << highCongestion.size() << " stations\n";
-    std::cout << "🔴 SEVERE (>= 200):   " << severeCongestion.size() << " stations\n\n";
+    std::cout << GREEN << "🟢 LOW (< 50):        " << lowCongestion.size() << " stations" << RESET << "\n";
+    std::cout << YELLOW << "🟡 MEDIUM (50-99):    " << mediumCongestion.size() << " stations" << RESET << "\n";
+    std::cout << ORANGE << "🟠 HIGH (100-199):    " << highCongestion.size() << " stations" << RESET << "\n";
+    std::cout << RED << "🔴 SEVERE (>= 200):   " << severeCongestion.size() << " stations" << RESET << "\n\n";
     
     // Alert for severe congestion
     if (!severeCongestion.empty()) {
-        std::cout << "⚠️  CRITICAL ALERT - SEVERE CONGESTION:\n";
-        std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        std::cout << BOLDRED << "⚠️  CRITICAL ALERT - SEVERE CONGESTION:\n" << RESET;
+        std::cout << RED << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         for (const auto& station : severeCongestion) {
             std::cout << "   • " << station << "\n";
         }
-        std::cout << "\n💡 RECOMMENDATIONS:\n";
-        std::cout << "   - Deploy additional crowd control personnel\n";
+        std::cout << RESET << "\n💡 " << BOLDYELLOW << "RECOMMENDATIONS:\n" << RESET;
+        std::cout << YELLOW << "   - Deploy additional crowd control personnel\n";
         std::cout << "   - Increase train frequency on affected lines\n";
         std::cout << "   - Activate emergency protocols if necessary\n";
-        std::cout << "   - Monitor in real-time for safety compliance\n\n";
+        std::cout << "   - Monitor in real-time for safety compliance\n\n" << RESET;
     }
     
     // Display high congestion stations
     if (!highCongestion.empty()) {
-        std::cout << "⚠️  HIGH CONGESTION STATIONS:\n";
-        std::cout << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        std::cout << BOLDYELLOW << "⚠️  HIGH CONGESTION STATIONS:\n" << RESET;
+        std::cout << YELLOW << "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         for (const auto& station : highCongestion) {
             std::cout << "   • " << station << "\n";
         }
-        std::cout << "\n";
+        std::cout << RESET << "\n";
     }
     
     std::cout << "══════════════════════════════════════════════════════════\n\n";
