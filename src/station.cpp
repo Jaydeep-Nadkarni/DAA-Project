@@ -219,31 +219,26 @@ void initializeStations(StationBST& stationDirectory, RailwayNetwork* mumbaiLoca
     };
 
     // Add Western Line stations
-    std::cout << "Loading Western Line (37 stations)...\n";
     for (const auto& s : western) {
         addOrGetStation(s, WESTERN);
     }
 
     // Add Central Line stations
-    std::cout << "Loading Central Line (25 stations)...\n";
     for (const auto& s : central) {
         addOrGetStation(s, CENTRAL);
     }
 
     // Add Harbour Line stations
-    std::cout << "Loading Harbour Line (20 stations)...\n";
     for (const auto& s : harbour) {
         addOrGetStation(s, HARBOUR);
     }
     
     // Add Trans-Harbour Line stations
-    std::cout << "Loading Trans-Harbour Line (17 stations)...\n";
     for (const auto& s : transHarbour) {
         addOrGetStation(s, TRANS_HARBOUR);
     }
 
     // Connect stations with realistic distances and times
-    std::cout << "Connecting tracks with distances and times...\n";
     
     // WESTERN LINE: Connect sequential stations (2-4 km, 3-5 min)
     for (size_t i = 0; i < western.size() - 1; ++i) {
@@ -300,6 +295,4 @@ void initializeStations(StationBST& stationDirectory, RailwayNetwork* mumbaiLoca
         int time = 5 + (rand() % 3);      // 5-7 min
         mumbaiLocal->addTrack(u_id, v_id, time, distance, TRANS_HARBOUR);
     }
-    
-    std::cout << "Stations initialized: " << allStations.size() << " total stations loaded.\n";
 }

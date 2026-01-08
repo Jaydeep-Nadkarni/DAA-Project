@@ -1,1 +1,78 @@
-﻿id,name,line,platforms,passengerCount,isInterchange
+id,name,line,platforms,passengerCount,isInterchange
+0,Churchgate,0,2,0,0
+1,Marine Lines,0,2,0,0
+2,Charni Road,0,2,0,0
+3,Grant Road,0,2,0,1
+4,Mumbai Central,0,2,0,0
+5,Lower Parel,0,2,0,0
+6,Elphinstone Road,0,2,0,0
+7,Dadar,0,2,0,1
+8,Mahalaxmi,0,2,0,0
+9,Byculla,0,2,0,1
+10,Worli,0,2,0,0
+11,Bandra,0,2,0,0
+12,Mahim Junction,0,2,0,0
+13,Bombay Central,0,2,0,0
+14,Andheri,0,2,0,0
+15,Vile Parle,0,2,0,0
+16,Vilhedev Station,0,2,0,0
+17,Jogeshwari,0,2,0,0
+18,Goregaon,0,2,0,0
+19,Malad,0,2,0,0
+20,Borivali,0,2,0,0
+21,Dahisar,0,2,0,0
+22,Mira Road,0,2,0,0
+23,Bhayandar,0,2,0,0
+24,Vasai Road,0,2,0,0
+25,Virar East,0,2,0,0
+26,Virar,0,2,0,0
+27,CST,1,2,0,1
+28,Masjid,1,2,0,0
+29,Sandhurst Road,1,2,0,0
+30,Parel,1,2,0,0
+31,Sion,1,2,0,0
+32,Kurla,1,2,0,0
+33,Vidyavihar,1,2,0,0
+34,Ghatkopar,1,2,0,0
+35,Vikhroli,1,2,0,0
+36,Kanjur Marg,1,2,0,0
+37,Mulund,1,2,0,0
+38,Thane,1,2,0,0
+39,Mulund East,1,2,0,0
+40,Vangani,1,2,0,0
+41,Kalyan,1,2,0,0
+42,Vithalwadi,1,2,0,0
+43,Ulhasnagar,1,2,0,0
+44,Ambernath,1,2,0,0
+45,Badlapur,1,2,0,0
+46,Kasara,1,2,0,0
+47,Dombivli East,1,2,0,0
+48,Dombivli,1,2,0,0
+49,Dockyard Road,2,2,0,0
+50,Cotton Green,2,2,0,0
+51,Reay Road,2,2,0,0
+52,Govandi,2,2,0,0
+53,Mankhurd,2,2,0,0
+54,Vashi,2,2,0,1
+55,Turbhe,2,2,0,1
+56,New Panvel,2,2,0,0
+57,Nerul,2,2,0,1
+58,Seawood-Darave,2,2,0,0
+59,Belapur CBD,2,2,0,0
+60,Belapur,2,2,0,1
+61,Kharghar,2,2,0,1
+62,Panvel,2,2,0,1
+63,Khandeshwar,2,2,0,1
+64,Uran,2,2,0,0
+65,Penned,2,2,0,0
+66,Dahanu,2,2,0,0
+67,Panvel Central,2,2,0,0
+68,Shivaji Maharaj Terminus,3,2,0,0
+69,Mazagon,3,2,0,0
+70,Wadala,3,2,0,0
+71,Sewri,3,2,0,0
+72,Seawood,3,2,0,0
+73,Alibaug,3,2,0,0
+74,Murud,3,2,0,0
+75,Kashid,3,2,0,0
+76,Dapoli,3,2,0,0

@@ -14,6 +14,10 @@
 #include "station.h"
 #include "graph.h"
 
+// System Configuration
+extern double BASE_FARE;
+extern double FARE_PER_KM;
+
 // ======================================================================================
 //                                   GLOBAL VARIABLES
 // ======================================================================================

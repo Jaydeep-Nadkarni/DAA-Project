@@ -51,17 +51,25 @@
 
 using namespace std;
 
-enum NavigatorState { MAIN_MENU, STATIONS_MENU, TICKETING_MENU, ANALYTICS_MENU };
+enum NavigatorState { MAIN_MENU, STATIONS_MENU, TICKETING_MENU, ANALYTICS_MENU, ADMIN_MENU };
 
 // Dashboard and Navigation Functions
 void displayMainDashboard();
 void displayStationsRoutesDashboard();
 void displayTicketingDashboard();
 void displayAnalyticsDashboard();
+void displayAdminDashboard();
+
+// Administrative Functions
+void handleNewRoute();
+void handleFareUpdate();
 
 // ======================================================================================
 //                                   GLOBAL SYSTEM OBJECTS
 // ======================================================================================
+
+double BASE_FARE = 10.0;
+double FARE_PER_KM = 2.0;
 
 StationBST stationDirectory;        // BST for station search
 TicketSystem ticketMachine;         // Multi-queue ticketing system
@@ -78,20 +86,11 @@ PlatformQueue platformManager(10);  // Circular queue for platform allocation
  * Initializes the Mumbai Local Railway system with persistence support
  */
 void initializeSystem() {
-    cout << BOLDBLUE << "\n========================================================\n";
-    cout << "         " << BOLDWHITE << "SYSTEM INITIALIZATION IN PROGRESS..." << BOLDBLUE << "          \n";
-    cout << "========================================================\n" << RESET;
-    
     // Step 1: Create railway network graph
     mumbaiLocal = new RailwayNetwork(MAX_STATIONS);
     
-    // Step 2 & 3: Try to load from CSV; otherwise fallback to default
-    cout << YELLOW << "Loading station network..." << RESET << "\n";
-    
     // Attempt to load from CSV first
     if (CSVManager::loadStations(allStations) && !allStations.empty()) {
-        cout << GREEN << "✓ Loaded " << allStations.size() << " stations from data/stations.csv" << RESET << "\n";
-        
         // Re-populate BST and lookup maps from loaded vector
         for (const auto& s : allStations) {
             stationDirectory.addStation(s.name, s.id);
@@ -102,13 +101,9 @@ void initializeSystem() {
         }
         
         // Load routes into the graph
-        if (CSVManager::loadRoutes(mumbaiLocal)) {
-            cout << GREEN << "✓ Loaded network connections from data/routes.csv" << RESET << "\n";
-        }
+        CSVManager::loadRoutes(mumbaiLocal);
     } else {
-        cout << YELLOW << "No station data found. Initializing with default Mumbai network..." << RESET << "\n";
         initializeStations(stationDirectory, mumbaiLocal);
-        cout << GREEN << "✓ Default network initialized with " << allStations.size() << " stations.\n" << RESET;
         
         // Save for next time
         CSVManager::saveStations(allStations);
@@ -116,7 +111,6 @@ void initializeSystem() {
     }
     
     // Step 4: Schedule initial trains (Static for demo)
-    cout << YELLOW << "Scheduling initial trains..." << RESET << "\n";
     if (stationNameToId.count("churchgate")) 
         trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["churchgate"]);
     if (stationNameToId.count("virar"))
@@ -127,8 +121,6 @@ void initializeSystem() {
     // Step 5: Assign some trains to platform queue
     platformManager.enqueue(101);
     platformManager.enqueue(102);
-    
-    cout << "\n" << GREEN << "✓ System ready for operations." << RESET << "\n\n";
 }
 
 // ======================================================================================
@@ -250,9 +242,98 @@ void displayAnalyticsDashboard() {
     cout << "Enter analytics choice: ";
 }
 
+void displayAdminDashboard() {
+    cout << BOLDRED << "\n" << "╔════════════════════════════════════════════════════════╗" << "\n";
+    cout << "║             " << BOLDWHITE << "ADMINISTRATIVE & OPERATIONS" << BOLDRED << "               ║" << "\n";
+    cout << "╚════════════════════════════════════════════════════════╝" << RESET << "\n";
+    cout << "  1. Create New Route (Add Track)\n";
+    cout << "  2. Update System Fare Rates\n";
+    cout << "  3. Report Emergency Track Failure\n";
+    cout << "  9. Back to Main Menu\n";
+    cout << "  0. Exit\n";
+    cout << "--------------------------------------------------------\n";
+    cout << "Enter admin choice: ";
+}
+
 // ======================================================================================
 //                                   MENU HANDLERS
 // ======================================================================================
+
+/**
+ * Function: handleFareUpdate
+ * Allows administrators to change the system-wide fare parameters
+ */
+void handleFareUpdate() {
+    cout << "\n--- SYSTEM FARE CONFIGURATION ---\n";
+    cout << "Current Base Fare: Rs. " << BASE_FARE << "\n";
+    cout << "Current Fare/KM: Rs. " << FARE_PER_KM << "\n";
+    
+    cout << "\nEnter new Base Fare: ";
+    if(!(cin >> BASE_FARE)) { cin.clear(); cin.ignore(10000, '\n'); return; }
+    
+    cout << "Enter new Fare per KM: ";
+    if(!(cin >> FARE_PER_KM)) { cin.clear(); cin.ignore(10000, '\n'); return; }
+    
+    cout << GREEN << "\n✓ Fare rates updated successfully!\n" << RESET;
+}
+
+/**
+ * Function: handleNewRoute
+ * Adds a new track connection between two existing stations
+ */
+void handleNewRoute() {
+    string src, dest;
+    int distance;
+    
+    cout << "\n--- CREATE NEW ROUTE ---\n";
+    cout << "Enter source station: ";
+    cin.ignore();
+    getline(cin, src);
+    
+    string srcL = src;
+    std::transform(srcL.begin(), srcL.end(), srcL.begin(), ::tolower);
+    int u = stationDirectory.getStationId(srcL);
+    if (u == -1) {
+        cout << RED << "❌ Station not found: " << src << RESET << endl;
+        return;
+    }
+    
+    cout << "Enter destination station: ";
+    getline(cin, dest);
+    string destL = dest;
+    std::transform(destL.begin(), destL.end(), destL.begin(), ::tolower);
+    int v = stationDirectory.getStationId(destL);
+    if (v == -1) {
+        cout << RED << "❌ Station not found: " << dest << RESET << endl;
+        return;
+    }
+    
+    cout << "Enter distance (km): ";
+    if(!(cin >> distance)) { cin.clear(); cin.ignore(10000, '\n'); return; }
+    
+    cout << "Select Line Type:\n";
+    cout << "  1. Western\n";
+    cout << "  2. Central\n";
+    cout << "  3. Harbour\n";
+    cout << "  4. Trans-Harbour\n";
+    cout << "Enter choice (1-4): ";
+    int lineChoice;
+    cin >> lineChoice;
+    
+    LineType line = WESTERN;
+    if (lineChoice == 2) line = CENTRAL;
+    else if (lineChoice == 3) line = HARBOUR;
+    else if (lineChoice == 4) line = TRANS_HARBOUR;
+    
+    int time = distance * 2; // Rule of thumb: 2 mins per km
+    
+    mumbaiLocal->addTrack(u, v, time, distance, line);
+    cout << GREEN << "✓ Track added between " << src << " and " << dest 
+         << " (" << distance << " km, " << time << " mins)\n" << RESET;
+    
+    // Save the new network state
+    CSVManager::saveRoutes(mumbaiLocal);
+}
 
 /**
  * Function: showStationSuggestions
@@ -485,9 +566,8 @@ void handleTicketing() {
     else cout << "GENERAL";
     cout << " queue.\n";
     
-    // Compute fare: 10 + 2*distance_km
-    int baseFare = 10;
-    int fare = baseFare + (distance * 2);
+    // Compute fare: BASE_FARE + FARE_PER_KM*distance_km
+    int fare = (int)(BASE_FARE + (distance * FARE_PER_KM));
     
     // Apply discount for seniors
     if (type == SENIOR) {
@@ -669,9 +749,7 @@ int main() {
                 case 1: currentState = STATIONS_MENU; break;
                 case 2: currentState = TICKETING_MENU; break;
                 case 3: currentState = ANALYTICS_MENU; break;
-                case 4:
-                    handleTrackFailure();
-                    break;
+                case 4: currentState = ADMIN_MENU; break;
                 case 0:
                     running = false;
                     break;
@@ -738,6 +816,22 @@ int main() {
                 case 2: displayCongestionReport(); break;
                 case 3: displayPeakHourStatistics(); break;
                 case 4: displayComprehensiveAnalytics(ticketMachine); break;
+                case 9: currentState = MAIN_MENU; break;
+                case 0: running = false; break;
+                default: cout << RED << "❌ Invalid option.\n" << RESET;
+            }
+        }
+        else if (currentState == ADMIN_MENU) {
+            displayAdminDashboard();
+            if (!(cin >> subChoice)) {
+                cin.clear(); cin.ignore(10000, '\n');
+                continue;
+            }
+            
+            switch (subChoice) {
+                case 1: handleNewRoute(); break;
+                case 2: handleFareUpdate(); break;
+                case 3: handleTrackFailure(); break;
                 case 9: currentState = MAIN_MENU; break;
                 case 0: running = false; break;
                 default: cout << RED << "❌ Invalid option.\n" << RESET;
