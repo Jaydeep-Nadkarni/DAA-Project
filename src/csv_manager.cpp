@@ -11,9 +11,15 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <filesystem>
+#include <sys/stat.h>
 
-namespace fs = std::filesystem;
+#ifdef _WIN32
+    #include <direct.h>
+    #define MKDIR(path) _mkdir(path)
+#else
+    #include <unistd.h>
+    #define MKDIR(path) mkdir(path, 0777)
+#endif
 
 const std::string CSVManager::STATION_FILE = "data/stations.csv";
 const std::string CSVManager::TICKET_FILE = "data/tickets.csv";
@@ -21,8 +27,9 @@ const std::string CSVManager::ROUTE_FILE = "data/routes.csv";
 const std::string CSVManager::USER_FILE = "data/users.csv";
 
 void CSVManager::initializeDataDirectory() {
-    if (!fs::exists("data")) {
-        fs::create_directory("data");
+    struct stat info;
+    if (stat("data", &info) != 0) {
+        MKDIR("data");
     }
 }
 
@@ -80,7 +87,10 @@ void CSVManager::saveTickets(const std::vector<Passenger>& tickets) {
 }
 
 void CSVManager::appendTicket(const Passenger& t) {
-    bool fileExists = fs::exists(TICKET_FILE);
+    std::ifstream checkFile(TICKET_FILE);
+    bool fileExists = checkFile.good();
+    checkFile.close();
+
     std::ofstream file(TICKET_FILE, std::ios::app);
     if (!file.is_open()) return;
 

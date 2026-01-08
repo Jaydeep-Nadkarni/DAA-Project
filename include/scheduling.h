@@ -72,7 +72,7 @@ class MinHeap {
 public:
     void push(T val) {
         heap.push_back(val);
-        heapifyUp(heap.size() - 1);
+        heapifyUp((int)heap.size() - 1);
     }
 
     void pop() {
