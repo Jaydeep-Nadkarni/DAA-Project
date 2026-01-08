@@ -51,7 +51,13 @@
 
 using namespace std;
 
-enum NavigatorState { MAIN_MENU, STATIONS_MENU, TICKETING_MENU };
+enum NavigatorState { MAIN_MENU, STATIONS_MENU, TICKETING_MENU, ANALYTICS_MENU };
+
+// Dashboard and Navigation Functions
+void displayMainDashboard();
+void displayStationsRoutesDashboard();
+void displayTicketingDashboard();
+void displayAnalyticsDashboard();
 
 // ======================================================================================
 //                                   GLOBAL SYSTEM OBJECTS
@@ -69,66 +75,113 @@ PlatformQueue platformManager(10);  // Circular queue for platform allocation
 
 /**
  * Function: initializeSystem
- * Initializes the entire Mumbai Local Railway system
- * 
- * Tasks Performed:
- * 1. Initialize all stations on three railway lines
- * 2. Set up station directory (BST)
- * 3. Create railway network graph
- * 4. Add tracks between stations
- * 5. Schedule initial trains
- * 6. Prepare system for operations
- * 
- * Time Complexity: O(n log n) for BST insertions
- * 
- * Real-world use: System startup, cold boot initialization
+ * Initializes the Mumbai Local Railway system with persistence support
  */
 void initializeSystem() {
-    // Step 1: Create railway network graph
-    mumbaiLocal = new RailwayNetwork(100);
+    cout << BOLDBLUE << "\n========================================================\n";
+    cout << "         " << BOLDWHITE << "SYSTEM INITIALIZATION IN PROGRESS..." << BOLDBLUE << "          \n";
+    cout << "========================================================\n" << RESET;
     
-    // Step 2: Initialize stations - Load from CSV if exists, else defaults
-    if (CSVManager::loadStations(allStations)) {
-        // Rebuild BST and ID maps from loaded stations
-        for (auto& s : allStations) {
+    // Step 1: Create railway network graph
+    mumbaiLocal = new RailwayNetwork(MAX_STATIONS);
+    
+    // Step 2 & 3: Try to load from CSV; otherwise fallback to default
+    cout << YELLOW << "Loading station network..." << RESET << "\n";
+    
+    // Attempt to load from CSV first
+    if (CSVManager::loadStations(allStations) && !allStations.empty()) {
+        cout << GREEN << "✓ Loaded " << allStations.size() << " stations from data/stations.csv" << RESET << "\n";
+        
+        // Re-populate BST and lookup maps from loaded vector
+        for (const auto& s : allStations) {
             stationDirectory.addStation(s.name, s.id);
-            string nameLower = s.name;
-            std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
-            stationNameToId[nameLower] = s.id;
+            string nameL = s.name;
+            std::transform(nameL.begin(), nameL.end(), nameL.begin(), ::tolower);
+            stationNameToId[nameL] = s.id;
             stationIdToName[s.id] = s.name;
         }
         
-        // Load routes from CSV
-        if (!CSVManager::loadRoutes(mumbaiLocal)) {
-            // If routes CSV missing but stations exist, we might have a problem
-            // But for now, we'll assume they go together
+        // Load routes into the graph
+        if (CSVManager::loadRoutes(mumbaiLocal)) {
+            cout << GREEN << "✓ Loaded network connections from data/routes.csv" << RESET << "\n";
         }
     } else {
-        // Initialize with default hardcoded data
+        cout << YELLOW << "No station data found. Initializing with default Mumbai network..." << RESET << "\n";
         initializeStations(stationDirectory, mumbaiLocal);
+        cout << GREEN << "✓ Default network initialized with " << allStations.size() << " stations.\n" << RESET;
         
-        // Save initial data to CSV for future use
+        // Save for next time
         CSVManager::saveStations(allStations);
         CSVManager::saveRoutes(mumbaiLocal);
     }
     
-    // Step 3: Schedule initial trains
+    // Step 4: Schedule initial trains (Static for demo)
+    cout << YELLOW << "Scheduling initial trains..." << RESET << "\n";
+    if (stationNameToId.count("churchgate")) 
+        trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["churchgate"]);
+    if (stationNameToId.count("virar"))
+        trainScheduler.scheduleTrain(102, "Virar Slow", 375, stationNameToId["virar"]);
+    if (stationNameToId.count("dadar"))
+        trainScheduler.scheduleTrain(201, "Dadar Special", 480, stationNameToId["dadar"]);
     
-    // Morning trains
-    trainScheduler.scheduleTrain(101, "Churchgate Fast", 360, stationNameToId["churchgate"]);   // 6:00 AM
-    trainScheduler.scheduleTrain(102, "Virar Slow", 375, stationNameToId["virar"]);            // 6:15 AM
-    trainScheduler.scheduleTrain(103, "CST Express", 420, stationNameToId["cst"]);             // 7:00 AM
-    trainScheduler.scheduleTrain(104, "Kalyan Local", 450, stationNameToId["kalyan"]);         // 7:30 AM
-    
-    // Peak hour trains
-    trainScheduler.scheduleTrain(201, "Dadar Special", 480, stationNameToId["dadar"]);         // 8:00 AM
-    trainScheduler.scheduleTrain(202, "Andheri Fast", 510, stationNameToId["andheri"]);        // 8:30 AM
-    trainScheduler.scheduleTrain(203, "Harbour Express", 540, stationNameToId["panvel"]);      // 9:00 AM
-    
-    // Step 4: Assign some trains to platform queue
+    // Step 5: Assign some trains to platform queue
     platformManager.enqueue(101);
     platformManager.enqueue(102);
-    platformManager.enqueue(103);
+    
+    cout << "\n" << GREEN << "✓ System ready for operations." << RESET << "\n\n";
+}
+
+// ======================================================================================
+//                                   LOGIN SYSTEM
+// ======================================================================================
+
+void displayBanner() {
+    cout << BOLDCYAN << "================================================================================\n";
+    cout << BOLDMAGENTA << "  __  __ _   _ __  __ ____         ___   _      ___   ____    _    _     \n";
+    cout << " |  \\/  | | | |  \\/  | __ )   _    / _ \\ | |    / _ \\ / ___|  / \\  | |    \n";
+    cout << " | |\\/| | | | | |\\/| |  _ \\  (_)  | | | || |   | | | | |     / _ \\ | |    \n";
+    cout << " | |  | | |_| | |  | | |_) |  _   | |_| || |___| |_| | |___ / ___ \\| |___ \n";
+    cout << " |_|  |_|\\___/|_|  |_|____/  (_)   \\___/ |_____|\\___/ \\____/_/   \\_\\_____|\n";
+    cout << "                                                                            \n";
+    cout << BOLDWHITE << "           MUMBAI LOCAL RAILWAY - TRANSPORT MANAGEMENT SYSTEM               \n";
+    cout << BOLDCYAN << "================================================================================" << RESET << "\n\n";
+}
+
+/**
+ * Function: authenticateUser
+ * Displays login screen and validates credentials
+ * Returns true if authentication successful, false otherwise
+ */
+bool authenticateUser() {
+    string username, password;
+    int attempts = 0;
+    const int MAX_ATTEMPTS = 3;
+    
+    while (attempts < MAX_ATTEMPTS) {
+        cout << CYAN << "------------------------------------------\n";
+        cout << "             ADMIN LOGIN                  \n";
+        cout << "------------------------------------------\n" << RESET;
+        
+        cout << YELLOW << "  👤 Username: " << RESET;
+        cin >> username;
+        cout << YELLOW << "  🔒 Password: " << RESET;
+        cin >> password;
+        
+        if (username == "Jaydeep" && password == "jaydeep123") {
+            cout << GREEN << "\n✓ Login Successful! Welcome, " << username << ".\n" << RESET;
+            return true;
+        } else {
+            attempts++;
+            cout << RED << "\n❌ Invalid credentials! ";
+            if (attempts < MAX_ATTEMPTS) {
+                cout << "(" << (MAX_ATTEMPTS - attempts) << " attempt(s) remaining)\n" << RESET;
+            } else {
+                cout << "\n⚠️  ACCESS DENIED: Maximum attempts exceeded.\n" << RESET;
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
 // ======================================================================================
@@ -136,51 +189,65 @@ void initializeSystem() {
 // ======================================================================================
 
 /**
- * Function: displayMainDashboard
- * Displays the primary navigation menu
+ * Navigation Dashboard Functions
+ * Implements a hierarchical UI for better user experience
  */
+
 void displayMainDashboard() {
-    cout << BOLDCYAN << "========================================================\n" << RESET;
-    cout << BOLDWHITE << "      MUMBAI LOCAL RAILWAY - SYSTEM DASHBOARD           \n" << RESET;
-    cout << BOLDCYAN << "========================================================\n" << RESET;
-    cout << "  [" << BOLDGREEN << "1" << RESET << "] " << CYAN << "Stations & Routes Management" << RESET << "\n";
-    cout << "  [" << BOLDGREEN << "2" << RESET << "] " << CYAN << "Ticketing & Passenger Flow" << RESET << "\n";
-    cout << "  [" << BOLDRED << "3" << RESET << "] " << RED << "Exit System" << RESET << "\n";
-    cout << BOLDCYAN << "========================================================\n" << RESET;
-    cout << "\nEnter your choice: ";
+    cout << BOLDCYAN << "\n" << "╔════════════════════════════════════════════════════════╗" << "\n";
+    cout << "║             " << BOLDWHITE << "SYSTEM CONTROL DASHBOARD" << BOLDCYAN << "                   ║" << "\n";
+    cout << "╚════════════════════════════════════════════════════════╝" << RESET << "\n";
+    cout << "  1. Stations & Network Management\n";
+    cout << "  2. Ticketing & Passenger Services\n";
+    cout << "  3. Real-time System Analytics \n";
+    cout << "  4. Administrative & Emergency Operations\n";
+    cout << "  0. Exit System\n";
+    cout << "--------------------------------------------------------\n";
+    cout << "Enter category choice: ";
 }
 
-/**
- * Function: displayStationsRoutesDashboard
- * Displays station management and routing options
- */
 void displayStationsRoutesDashboard() {
-    cout << BOLDMAGENTA << "\n========================================================\n" << RESET;
-    cout << BOLDWHITE << "             STATIONS & ROUTES MANAGEMENT               \n" << RESET;
-    cout << BOLDMAGENTA << "========================================================\n" << RESET;
-    cout << "  " << GREEN << "1." << RESET << " View All Stations (BST Traversal)\n";
-    cout << "  " << GREEN << "2." << RESET << " Search Station (BST Search)\n";
-    cout << "  " << GREEN << "3." << RESET << " Find Fastest Route (Dijkstra)\n";
-    cout << "  " << GREEN << "4." << RESET << " Check Network Connectivity (BFS)\n";
-    cout << BOLDYELLOW << "  0. Back to Main Dashboard\n" << RESET;
-    cout << BOLDMAGENTA << "========================================================\n" << RESET;
-    cout << "\nEnter your choice: ";
+    cout << BOLDCYAN << "\n" << "╔════════════════════════════════════════════════════════╗" << "\n";
+    cout << "║             " << BOLDWHITE << "STATIONS & NETWORK MANAGEMENT" << BOLDCYAN << "             ║" << "\n";
+    cout << "╚════════════════════════════════════════════════════════╝" << RESET << "\n";
+    cout << "  1. View All Stations (BST Traversal)\n";
+    cout << "  2. Search Station (BST Search)\n";
+    cout << "  3. Find Fastest Route (Dijkstra's)\n";
+    cout << "  4. Check Network Connectivity (BFS)\n";
+    cout << "  5. View Network Statistics\n";
+    cout << "  9. Back to Main Menu\n";
+    cout << "  0. Exit\n";
+    cout << "--------------------------------------------------------\n";
+    cout << "Enter operation: ";
 }
 
-/**
- * Function: displayTicketingDashboard
- * Displays ticketing and queuing options
- */
 void displayTicketingDashboard() {
-    cout << BOLDGREEN << "\n========================================================\n" << RESET;
-    cout << BOLDWHITE << "             TICKETING & PASSENGER DASHBOARD            \n" << RESET;
-    cout << BOLDGREEN << "========================================================\n" << RESET;
-    cout << "  " << CYAN << "1." << RESET << " Buy Ticket (Multi-Queue Processing)\n";
-    cout << "  " << CYAN << "2." << RESET << " View Ticketing Statistics\n";
-    cout << "  " << CYAN << "3." << RESET << " Process Platform Queues\n";
-    cout << BOLDYELLOW << "  0. Back to Main Dashboard\n" << RESET;
-    cout << BOLDGREEN << "========================================================\n" << RESET;
-    cout << "\nEnter your choice: ";
+    cout << BOLDCYAN << "\n" << "╔════════════════════════════════════════════════════════╗" << "\n";
+    cout << "║             " << BOLDWHITE << "TICKETING & PASSENGER SERVICES" << BOLDCYAN << "            ║" << "\n";
+    cout << "╚════════════════════════════════════════════════════════╝" << RESET << "\n";
+    cout << "  1. Buy Ticket (Booking Queue)\n";
+    cout << "  2. View Ticketing Sales Statistics\n";
+    cout << "  3. View Train Schedules (Min-Heap)\n";
+    cout << "  4. Process Platform Arrivals (Circular Queue)\n";
+    cout << "  5. Simulate Passenger Load\n";
+    cout << "  9. Back to Main Menu\n";
+    cout << "  0. Exit\n";
+    cout << "--------------------------------------------------------\n";
+    cout << "Enter operation: ";
+}
+
+void displayAnalyticsDashboard() {
+    cout << BOLDCYAN << "\n" << "╔════════════════════════════════════════════════════════╗" << "\n";
+    cout << "║             " << BOLDWHITE << "REAL-TIME SYSTEM ANALYTICS" << BOLDCYAN << "                ║" << "\n";
+    cout << "╚════════════════════════════════════════════════════════╝" << RESET << "\n";
+    cout << "  1. Passenger Flow Analysis\n";
+    cout << "  2. Station Congestion Heatmap\n";
+    cout << "  3. Peak Hour Performance Stats\n";
+    cout << "  4. Comprehensive System Dashboard\n";
+    cout << "  9. Back to Main Menu\n";
+    cout << "  0. Exit\n";
+    cout << "--------------------------------------------------------\n";
+    cout << "Enter analytics choice: ";
 }
 
 // ======================================================================================
@@ -564,187 +631,138 @@ void simulatePassengerLoad() {
 }
 
 // ======================================================================================
-//                                   AUTHENTICATION
-// ======================================================================================
-
-void displayBanner() {
-    cout << BOLDCYAN << "================================================================================\n";
-    cout << BOLDMAGENTA << "  __  __ _   _ __  __ ____         ___   _      ___   ____    _    _     \n";
-    cout << " |  \\/  | | | |  \\/  | __ )   _    / _ \\ | |    / _ \\ / ___|  / \\  | |    \n";
-    cout << " | |\\/| | | | | |\\/| |  _ \\  (_)  | | | || |   | | | | |     / _ \\ | |    \n";
-    cout << " | |  | | |_| | |  | | |_) |  _   | |_| || |___| |_| | |___ / ___ \\| |___ \n";
-    cout << " |_|  |_|\\___/|_|  |_|____/  (_)   \\___/ |_____|\\___/ \\____/_/   \\_\\_____|\n";
-    cout << "                                                                            \n";
-    cout << BOLDWHITE << "           MUMBAI LOCAL RAILWAY - TRANSPORT MANAGEMENT SYSTEM               \n";
-    cout << BOLDCYAN << "================================================================================" << RESET << "\n\n";
-}
-
-bool authenticateUser() {
-    string username, password;
-    cout << CYAN << "------------------------------------------\n";
-    cout << "             ADMIN LOGIN                  \n";
-    cout << "------------------------------------------\n" << RESET;
-    cout << YELLOW << "Username: " << RESET;
-    cin >> username;
-    cout << YELLOW << "Password: " << RESET;
-    cin >> password;
-    
-    if (username == "Jaydeep" && password == "jaydeep123") {
-        return true;
-    }
-    return false;
-}
-
-// ======================================================================================
 //                                   MAIN FUNCTION
 // ======================================================================================
 
 int main() {
     // Enable UTF-8 console output on Windows
     #ifdef _WIN32
-        // Set console code page to UTF-8
         system("chcp 65001 > nul 2>&1");
     #endif
     
-    // Seed random number generator
     srand(time(0));
-
-    // Initialize data directory
-    CSVManager::initializeDataDirectory();
-
-    // Startup Enhancements
     displayBanner();
     
-    int attempts = 0;
-    bool authenticated = false;
-    
-    while (attempts < 3) {
-        if (authenticateUser()) {
-            authenticated = true;
-            cout << GREEN << "\n✅ Login Successful! Welcome, Jaydeep.\n" << RESET;
-            break;
-        } else {
-            attempts++;
-            cout << RED << "\n❌ Invalid credentials. Attempts remaining: " << (3 - attempts) << "\n\n" << RESET;
-        }
-    }
-    
-    if (!authenticated) {
-        cout << BOLDRED << "❌ Maximum login attempts reached. System shutting down.\n" << RESET;
+    if (!authenticateUser()) {
+        cout << BOLDRED << "\n❌ Authentication Failed! Access Denied.\n" << RESET;
         return 1;
     }
+    
+    cout << GREEN << "\n✓ Authentication Successful! Welcome, Jaydeep.\n" << RESET;
     
     // Initialize the entire system
     initializeSystem();
     
-    int choice;
+    int mainChoice, subChoice;
     bool running = true;
     NavigatorState currentState = MAIN_MENU;
     
-    // Main menu loop
     while (running) {
         if (currentState == MAIN_MENU) {
             displayMainDashboard();
-        } else if (currentState == STATIONS_MENU) {
-            displayStationsRoutesDashboard();
-        } else if (currentState == TICKETING_MENU) {
-            displayTicketingDashboard();
-        }
-        
-        cin >> choice;
-        
-        // Clear any input errors
-        if (cin.fail()) {
-            cin.clear();
-            cin.ignore(10000, '\n');
-            cout << RED << "\n❌ Invalid input. Please enter a number.\n" << RESET;
-            continue;
-        }
-        
-        bool stateChanged = false;
-        
-        if (currentState == MAIN_MENU) {
-            switch (choice) {
-                case 1:
-                    currentState = STATIONS_MENU;
-                    stateChanged = true;
+            if (!(cin >> mainChoice)) {
+                cin.clear(); cin.ignore(10000, '\n');
+                continue;
+            }
+            
+            switch (mainChoice) {
+                case 1: currentState = STATIONS_MENU; break;
+                case 2: currentState = TICKETING_MENU; break;
+                case 3: currentState = ANALYTICS_MENU; break;
+                case 4:
+                    handleTrackFailure();
                     break;
-                case 2:
-                    currentState = TICKETING_MENU;
-                    stateChanged = true;
-                    break;
-                case 3:
-                    // Exit system
-                    cout << GREEN << "\n╔════════════════════════════════════════════════════════╗\n";
-                    cout << "║          Thank you for using the system!               ║\n";
-                    cout << "║              Have a safe journey! 🚂                   ║\n";
-                    cout << "╚════════════════════════════════════════════════════════╝\n\n" << RESET;
-                    
-                    // Auto-save on exit
-                    cout << CYAN << "Auto-saving system data...\n" << RESET;
-                    CSVManager::saveStations(allStations);
-                    CSVManager::saveRoutes(mumbaiLocal);
-                    cout << GREEN << "✓ Data saved successfully!\n" << RESET;
-                    
+                case 0:
                     running = false;
                     break;
                 default:
-                    cout << RED << "\n❌ Invalid choice. Please select 1-3.\n" << RESET;
-                    break;
+                    cout << RED << "❌ Invalid category.\n" << RESET;
             }
-        } else if (currentState == STATIONS_MENU) {
-            switch (choice) {
-                case 1:
-                    stationDirectory.listStations();
-                    break;
-                case 2:
-                    handleStationSearch();
-                    break;
-                case 3:
-                    handleRouteSearch();
-                    break;
-                case 4:
-                    handleConnectivityCheck();
-                    break;
-                case 0:
-                    currentState = MAIN_MENU;
-                    stateChanged = true;
-                    break;
-                default:
-                    cout << RED << "\n❌ Invalid choice. Please select 0-4.\n" << RESET;
-                    break;
+        } 
+        else if (currentState == STATIONS_MENU) {
+            displayStationsRoutesDashboard();
+            if (!(cin >> subChoice)) {
+                cin.clear(); cin.ignore(10000, '\n');
+                continue;
             }
-        } else if (currentState == TICKETING_MENU) {
-            switch (choice) {
-                case 1:
-                    handleTicketing();
-                    break;
-                case 2:
-                    ticketMachine.showStats();
-                    break;
-                case 3:
-                    handlePlatformQueue();
-                    break;
-                case 0:
-                    currentState = MAIN_MENU;
-                    stateChanged = true;
-                    break;
-                default:
-                    cout << RED << "\n❌ Invalid choice. Please select 0-3.\n" << RESET;
-                    break;
+            
+            switch (subChoice) {
+                case 1: stationDirectory.listStations(); break;
+                case 2: handleStationSearch(); break;
+                case 3: handleRouteSearch(); break;
+                case 4: handleConnectivityCheck(); break;
+                case 5: mumbaiLocal->displayNetworkStats(); break;
+                case 9: currentState = MAIN_MENU; break;
+                case 0: running = false; break;
+                default: cout << RED << "❌ Invalid option.\n" << RESET;
             }
         }
+        else if (currentState == TICKETING_MENU) {
+            displayTicketingDashboard();
+            if (!(cin >> subChoice)) {
+                cin.clear(); cin.ignore(10000, '\n');
+                continue;
+            }
+            
+            switch (subChoice) {
+                case 1: handleTicketing(); break;
+                case 2: ticketMachine.showStats(); break;
+                case 3: 
+                    {
+                        cout << "Enter station name: ";
+                        cin.ignore();
+                        string name; getline(cin, name);
+                        string nameL = name;
+                        std::transform(nameL.begin(), nameL.end(), nameL.begin(), ::tolower);
+                        int id = stationDirectory.getStationId(nameL);
+                        if (id != -1) trainScheduler.showTrainsAtStation(id);
+                        else cout << RED << "Station not found.\n" << RESET;
+                    }
+                    break;
+                case 4: handlePlatformQueue(); break;
+                case 5: simulatePassengerLoad(); break;
+                case 9: currentState = MAIN_MENU; break;
+                case 0: running = false; break;
+                default: cout << RED << "❌ Invalid option.\n" << RESET;
+            }
+        }
+        else if (currentState == ANALYTICS_MENU) {
+            displayAnalyticsDashboard();
+            if (!(cin >> subChoice)) {
+                cin.clear(); cin.ignore(10000, '\n');
+                continue;
+            }
+            
+            switch (subChoice) {
+                case 1: displayPassengerFlowAnalytics(); break;
+                case 2: displayCongestionReport(); break;
+                case 3: displayPeakHourStatistics(); break;
+                case 4: displayComprehensiveAnalytics(ticketMachine); break;
+                case 9: currentState = MAIN_MENU; break;
+                case 0: running = false; break;
+                default: cout << RED << "❌ Invalid option.\n" << RESET;
+            }
+        }
+
+        if (running && currentState == MAIN_MENU && mainChoice == 0) running = false;
         
-        // Pause before showing menu again, unless we just switched menus or are exiting
-        if (running && !stateChanged) {
+        if (running) {
             cout << "\nPress Enter to continue...";
-            cin.ignore();
+            cin.ignore(10000, '\n');
             cin.get();
         }
     }
     
-    // Cleanup
-    delete mumbaiLocal;
+    // Auto-save on exit
+    cout << YELLOW << "\nSaving system state..." << RESET << "\n";
+    CSVManager::saveStations(allStations);
+    CSVManager::saveRoutes(mumbaiLocal);
     
+    cout << BOLDCYAN << "\n╔════════════════════════════════════════════════════════╗\n";
+    cout << "║          " << BOLDWHITE << "Thank you for using the system!" << BOLDCYAN << "               ║\n";
+    cout << "║              " << BOLDWHITE << "Have a safe journey! 🚂" << BOLDCYAN << "                   ║\n";
+    cout << "╚════════════════════════════════════════════════════════╝\n\n" << RESET;
+    
+    delete mumbaiLocal;
     return 0;
 }
