@@ -492,7 +492,6 @@ Pre-configured popular routes:
 - [ ] **Multi-language Support**: Hindi, Marathi translations
 - [ ] **Payment Gateway**: UPI/Card payment integration
 - [ ] **Seat Reservation**: Coach and seat allocation
-- [ ] **Notification System**: SMS/Email alerts for train delays
 
 ---
 
